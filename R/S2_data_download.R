@@ -51,7 +51,33 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   granule_json_data <- httr::GET(request_string_no_spaces)
   granule_json_data_content <- httr::content(granule_json_data, "parsed")
 
+
+
+  #create temp folder if it doesn't exist yet for upcoming operations
+  temp_directory <- file.path(getwd(), "temp")
+
+  if (!dir.exists(temp_directory)) {
+    dir.create(temp_directory)
+  }
+
+  # Let user choose tiles based on result
   granule_IDs <- sapply(X = granule_json_data_content$value, function(X) X$Id)
+
+  footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
+
+  # loop to extract the data extent of each granule for user to chose intersecting tiles to cover AOI fully
+  for (footprint_ID in seq_along(footprints)) {
+    footprints_conversion_1 <- gsub("geography'", "", footprints[footprint_ID])
+    footprints_conversion_2 <- gsub("'", "", footprints_conversion_1)
+
+    footprint_wkt <- st_as_sfc(footprints_conversion_2)
+
+    footprint_sf <- st_sf(geometry = footprint_wkt)
+
+    st_write(footprint_sf, paste0(temp_directory, "/", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE)
+  }
+
+
 
   #print(granule_IDs)
   #print(request_string_no_spaces)
@@ -109,8 +135,6 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   }
 
 }
-
-
 
 
 
