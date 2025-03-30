@@ -8,7 +8,7 @@
 # https://stackoverflow.com/questions/50479535/cant-suppress-messages-in-blogdown-knitr
 
 
-S2_data_download <- function(username, password, start_date, end_date, aoi, cloud_cover_percent = 30, number_of_results = 1) {
+S2_data_download <- function(username, password, start_date, end_date, aoi, cloud_cover_percent = 20, number_of_results = 2) {
 
   # Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -74,13 +74,45 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
     footprint_sf <- sf::st_sf(geometry = footprint_wkt)
 
-    sf::st_write(footprint_sf, paste0(temp_directory, "/", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE)
+    sf::st_write(footprint_sf, paste0(temp_directory, "/",footprint_ID,"_", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE, quiet = TRUE)
   }
 
 
+  #creating function selecting tiles
 
-  #print(granule_IDs)
-  #print(request_string_no_spaces)
+  tile_footprint_list <- list.files(temp_directory, pattern = "\\.gpkg$", full.names = TRUE)
+
+  tile_footprint_sf <- sapply(tile_footprint_list, sf::st_read, quiet = TRUE)
+
+  graphics::par(mfrow = c(2, 2))
+
+  for (i in seq_along(tile_footprint_sf)) {
+    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i))
+    plot(aoi, add = TRUE, col = "red")
+  }
+
+  backup_granule_IDs <- granule_IDs
+
+
+  tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 3,4,6):")
+  tile_answer <- unlist(strsplit((tile_answer), split = ","))
+
+  selected_granules <- vector()
+
+  if (length(tile_answer)==0) {
+      warning("No tiles selected! Function will fail!")
+    } else if (length(tile_answer)==1) {
+      selected_granules <- backup_granule_IDs[as.numeric(tile_answer)]
+    } else {
+      for (selected_tiles in tile_answer) {
+        selected_granules[as.numeric(selected_tiles)] <- backup_granule_IDs[as.numeric(selected_tiles)]
+      }
+    }
+
+  selected_granules <- na.omit(selected_granules)
+  selected_granules <- as.vector(selected_granules)
+
+  print("Downloading selected Tile(s)")
 
   headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
@@ -94,7 +126,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
 
   # get bands based on user choosing AOI
-  for (granule_ID in granule_IDs) {
+  for (granule_ID in selected_granules) {
 
     nodes_base_url <- glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes")
 
@@ -125,17 +157,19 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
       dir.create(granule_directory)
     }
 
-    meta_data <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(MTD_MSIL2A.xml)/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_meta_data.xml")), overwrite = T))
+    #meta_data <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(MTD_MSIL2A.xml)/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_meta_data.xml")), overwrite = T))
     B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
-    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
-    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
-    B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
-    SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
+    #B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
+    #B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
+    #B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
+    #SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
 
   }
-
+  unlink(temp_directory, recursive=TRUE)
+  print("Download Complete!")
 }
 
 
 
 
+S2_data_download(username = username, password = password, start_date = start_date, end_date = end_date, aoi = "/Users/floriandialer/Downloads/polygon_shapefile.shp")
