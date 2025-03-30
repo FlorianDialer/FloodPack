@@ -25,6 +25,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
   #print(access_token)
 
+  print("Querying results from Copernicus...")
 
   # From aoi.shp/gpkg create Bounding Box and convert to WKT format for the query
   if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") warning("The provided AOI file needs to be in format .shp or .gpkg!")
@@ -88,7 +89,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
   for (i in seq_along(tile_footprint_sf)) {
     plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i))
-    plot(aoi, add = TRUE, col = "red")
+    plot(aoi[1,]$geometry, add = TRUE, col = "red")
   }
 
   backup_granule_IDs <- granule_IDs
@@ -112,7 +113,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   selected_granules <- na.omit(selected_granules)
   selected_granules <- as.vector(selected_granules)
 
-  print("Downloading selected Tile(s)")
+  print("Downloading selected tile(s)...")
 
   headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
@@ -172,4 +173,3 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
 
 
-S2_data_download(username = username, password = password, start_date = start_date, end_date = end_date, aoi = "/Users/floriandialer/Downloads/polygon_shapefile.shp")
