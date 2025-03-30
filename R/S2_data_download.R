@@ -4,10 +4,11 @@
 # https://cran.r-project.org/web/packages/httr/httr.pdf
 # https://www.dataquest.io/blog/apply-functions-in-r-sapply-lapply-tapply/
 # https://gis.stackexchange.com/questions/233670/sentinel2-get-jpeg200-bands-only
+# https://stackoverflow.com/questions/4216753/folder-management-with-r-check-existence-of-directory-and-create-it-if-it-does
+# https://stackoverflow.com/questions/50479535/cant-suppress-messages-in-blogdown-knitr
 
 
-
-S2_data_download <- function(username, password, start_date, end_date, aoi, cloud_cover_percent = 30, number_of_results = 2) {
+S2_data_download <- function(username, password, start_date, end_date, aoi, cloud_cover_percent = 30, number_of_results = 1) {
 
   # Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -28,7 +29,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   # From aoi.shp/gpkg create Bounding Box and convert to WKT format for the query
   if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") warning("The provided AOI file needs to be in format .shp or .gpkg!")
 
-  aoi <- sf::st_read(aoi)
+  aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- sf::st_transform(aoi, crs = "EPSG:4326")
 
   bbox <- sf::st_as_sfc(sf::st_bbox(aoi[1,])) # always the first feature gets selected!
@@ -58,7 +59,15 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
 
-  # get bands for letting user choose granules based on AOI
+  #create data folder if it doesn't exist yet
+  data_S2_directory <- file.path(getwd(), "data_S2_directory")
+
+  if (!dir.exists(data_S2_directory)) {
+    dir.create(data_S2_directory)
+  }
+
+
+  # get bands based on user choosing AOI
   for (granule_ID in granule_IDs) {
 
     nodes_base_url <- glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes")
@@ -81,23 +90,26 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
     nodes_5_content_B04 <- httr::content(nodes_5)$result[[4]]$Name
     nodes_5_content_B08 <- httr::content(nodes_5)$result[[5]]$Name
 
+    nodes_6 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes(R20m)/Nodes"))
+    nodes_6_content_SCL <- httr::content(nodes_6)$result[[12]]$Name
 
+    granule_directory <- file.path(data_S2_directory, granule_ID)
 
-    B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
-    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
-    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
-    B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
+    if (!dir.exists(granule_directory)) {
+      dir.create(granule_directory)
+    }
+
+    meta_data <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(MTD_MSIL2A.xml)/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_meta_data.xml")), overwrite = T))
+    B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
+    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
+    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
+    B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
+    SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
 
   }
 
-
-  granule_urls <- matrix(glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_IDs})"))
-
-  print(granule_urls)
-
-
-
 }
+
 
 
 
