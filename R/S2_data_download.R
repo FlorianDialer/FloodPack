@@ -55,7 +55,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   #print(granule_IDs)
   #print(request_string_no_spaces)
 
-  headers <- add_headers(Authorization = glue("Bearer {access_token}"))
+  headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
 
   # get bands for letting user choose granules based on AOI
@@ -79,11 +79,14 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
     nodes_5_content_B02 <- httr::content(nodes_5)$result[[2]]$Name
     nodes_5_content_B03 <- httr::content(nodes_5)$result[[3]]$Name
     nodes_5_content_B04 <- httr::content(nodes_5)$result[[4]]$Name
+    nodes_5_content_B08 <- httr::content(nodes_5)$result[[5]]$Name
 
 
-    B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
-    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
-    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
+
+    B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
+    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
+    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
+    B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(getwd(), glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
 
   }
 
@@ -95,7 +98,6 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
 
 }
-
 
 
 
