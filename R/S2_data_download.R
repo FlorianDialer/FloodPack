@@ -70,11 +70,11 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
     footprints_conversion_1 <- gsub("geography'", "", footprints[footprint_ID])
     footprints_conversion_2 <- gsub("'", "", footprints_conversion_1)
 
-    footprint_wkt <- st_as_sfc(footprints_conversion_2)
+    footprint_wkt <- sf::st_as_sfc(footprints_conversion_2)
 
-    footprint_sf <- st_sf(geometry = footprint_wkt)
+    footprint_sf <- sf::st_sf(geometry = footprint_wkt)
 
-    st_write(footprint_sf, paste0(temp_directory, "/", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE)
+    sf::st_write(footprint_sf, paste0(temp_directory, "/", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE)
   }
 
 
