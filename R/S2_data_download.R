@@ -6,9 +6,11 @@
 # https://gis.stackexchange.com/questions/233670/sentinel2-get-jpeg200-bands-only
 # https://stackoverflow.com/questions/4216753/folder-management-with-r-check-existence-of-directory-and-create-it-if-it-does
 # https://stackoverflow.com/questions/50479535/cant-suppress-messages-in-blogdown-knitr
+# https://stackoverflow.com/questions/22109774/r-raster-mosaic-from-list-of-rasters
 
 
-S2_data_download <- function(username, password, start_date, end_date, aoi, cloud_cover_percent = 20, number_of_results = 2) {
+
+S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 8) {
 
   # Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -64,7 +66,14 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   # Let user choose tiles based on result
   granule_IDs <- sapply(X = granule_json_data_content$value, function(X) X$Id)
 
+  #check if there is valid data
+
+  if(length(granule_IDs)==0) warning("There are no Sentinel-2 tiles with your selected options!") #needs rework!!
+
   footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
+
+  time_stamps <- sapply(X = granule_json_data_content$value, function(X) X$OriginDate)
+  time_stamps <- lapply(time_stamps, function(X) substr(X, 1, 10))
 
   # loop to extract the data extent of each granule for user to chose intersecting tiles to cover AOI fully
   for (footprint_ID in seq_along(footprints)) {
@@ -88,7 +97,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
   graphics::par(mfrow = c(2, 2))
 
   for (i in seq_along(tile_footprint_sf)) {
-    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i))
+    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps[i]))
     plot(aoi[1,]$geometry, add = TRUE, col = "red")
   }
 
@@ -110,7 +119,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
       }
     }
 
-  selected_granules <- na.omit(selected_granules)
+  selected_granules <- stats::na.omit(selected_granules)
   selected_granules <- as.vector(selected_granules)
 
   print("Downloading selected tile(s)...")
@@ -119,10 +128,18 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
 
 
   #create data folder if it doesn't exist yet
-  data_S2_directory <- file.path(getwd(), "data_S2_directory")
+  temp_data_directory <- file.path(getwd(), "temp_data_directory")
 
-  if (!dir.exists(data_S2_directory)) {
-    dir.create(data_S2_directory)
+  if (!dir.exists(temp_data_directory)) {
+    dir.create(temp_data_directory)
+  }
+
+  #create condition subdirectory
+
+  temp_data_condition_directory <- file.path(temp_data_directory, condition)
+
+  if (!dir.exists(temp_data_condition_directory)) {
+    dir.create(temp_data_condition_directory)
   }
 
 
@@ -152,18 +169,18 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, clou
     nodes_6 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes(R20m)/Nodes"))
     nodes_6_content_SCL <- httr::content(nodes_6)$result[[12]]$Name
 
-    granule_directory <- file.path(data_S2_directory, granule_ID)
+    granule_directory <- file.path(temp_data_condition_directory, granule_ID)
 
     if (!dir.exists(granule_directory)) {
       dir.create(granule_directory)
     }
 
-    #meta_data <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(MTD_MSIL2A.xml)/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_meta_data.xml")), overwrite = T))
+    meta_data <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(MTD_MSIL2A.xml)/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_meta_data.xml")), overwrite = T))
     B02 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B02})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B02.jp2")), overwrite = T))
-    #B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
-    #B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
-    #B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
-    #SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
+    B03 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B03})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B03.jp2")), overwrite = T))
+    B04 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B04})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B04.jp2")), overwrite = T))
+    B08 <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R10m)/Nodes({nodes_5_content_B08})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_B08.jp2")), overwrite = T))
+    SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
 
   }
   unlink(temp_directory, recursive=TRUE)
