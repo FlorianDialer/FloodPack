@@ -16,4 +16,6 @@ Imports:
     glue,
     httr,
     sf,
+    terra,
+    stats,
     tools
