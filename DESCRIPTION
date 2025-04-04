@@ -18,4 +18,5 @@ Imports:
     sf,
     terra,
     stats,
-    tools
+    tools,
+    XML
