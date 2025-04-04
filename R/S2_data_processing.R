@@ -1,3 +1,5 @@
+#https://stackoverflow.com/questions/74934891/specifying-layers-when-using-rast-type-xyz-to-convert-data-frame-to-spatra
+
 
 S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condition) {
 
@@ -12,6 +14,11 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   tiles <- tiles[-1]
 
   if(length(tiles)==0) warning("Unvalid condition provided!")
+
+
+  xmls <- lapply(tiles, function(tiles) {
+    list.files(path = tiles, pattern = "\\.xml$", full.names = TRUE, recursive = FALSE)
+  })
 
   jp2s <- lapply(tiles, function(tiles) {
     list.files(path = tiles, pattern = "\\.jp2$", full.names = TRUE, recursive = FALSE)
@@ -50,6 +57,22 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
 
     cropped_to_aoi <- terra::crop(masked_bands, aoi_with_tile_CRS)
     masked_to_aoi <- terra::mask(cropped_to_aoi, mask = aoi_with_tile_CRS)
+
+    #Adding Time Stamp
+
+    tile_xml <- xmls[[i]]
+
+    tile_xml_information <- XML::xmlParse(tile_xml)
+    tile_xml_roots <- XML::xmlRoot(tile_xml_information)
+    production_time_info <- XML::xmlValue(tile_xml_roots[[1]][[1]][[1]])
+    production_time <- as.vector(production_time_info)
+
+    production_time_formatted <- strptime(production_time, format = "%Y-%m-%d", tz = "UTC")
+
+    layers <- terra::nlyr(masked_to_aoi)
+    date_of_production <- rep(production_time_formatted, layers)
+
+    terra::time(masked_to_aoi) <- date_of_production
 
     rasters_list[[i]] <- masked_to_aoi
 
