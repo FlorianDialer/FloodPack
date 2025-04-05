@@ -1,15 +1,17 @@
 # SFMI Idea from: https://www.sciencedirect.com/science/article/pii/S0098300424002255
 
+# https://gis.stackexchange.com/questions/404441/converting-a-degree-slope-raster-to-a-percent-slope-raster-without-a-dem-using
+
 SFMI <- function(aoi, path_to_rasters = file.path(getwd(), "final_data")) {
 
   #Get final raster files for processing
   files_in_final_data <- list.files(path_to_rasters, full.names = TRUE)
 
-  pre_flood_raster <- files_in_final_data[grepl("pre", files_in_final_data)]
+  pre_flood_raster_path <- files_in_final_data[grepl("pre", files_in_final_data)]
 
-  if (length(pre_flood_raster)>1) warning("There can only be one pre_flood raster!")
+  if (length(pre_flood_raster_path)>1) warning("There can only be one pre_flood raster!")
 
-  flood_rasters <- files_in_final_data[!grepl("pre", files_in_final_data)]
+  flood_rasters_path <- files_in_final_data[!grepl("pre", files_in_final_data)]
 
 
 
@@ -54,6 +56,55 @@ SFMI <- function(aoi, path_to_rasters = file.path(getwd(), "final_data")) {
   } else {
     full_elevation_data <- do.call(terra::merge, elev_rasters)
   }
+
+
+  #Convert elevation data to S2 raster CRS
+  tile_crs <- terra::crs(terra::rast(pre_flood_raster_path))
+  full_elevation_data_new_crs <- terra::project(full_elevation_data, tile_crs)
+  aoi <- sf::st_transform(aoi, crs = tile_crs)
+
+  cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, aoi)
+  final_elevation_data <- terra::mask(cropped_elevation_data, aoi)
+
+
+  #Convert Elevation Data to Slope for Mask
+
+  slope <- terra::terrain(final_elevation_data, v="slope", neighbors=8, unit="degrees")
+
+  percent_slope <- tan(slope*pi/180)*100 #based on YamCham (2021) Stack Exchange
+
+  percent_slope_gt_15 <- percent_slope>15 #mask slope greater 15% according to paper
+
+
+  #Calculate NDVI
+
+  NDVI <- function(raster){
+
+    red_band <- terra::names(raster)[grepl("B04", terra::names(raster))]
+    nir_band <- terra::names(raster)[grepl("B08", terra::names(raster))]
+
+    NDVI_raster <- (raster[[nir_band]]-raster[[red_band]])/(raster[[nir_band]]+raster[[red_band]])
+
+    return(NDVI_raster)
+
+  }
+
+
+  pre_flood_raster <- terra::rast(pre_flood_raster_path)
+  pre_flood_NDVI <- NDVI(raster = pre_flood_raster)
+  pre_flood_NDVI_gt_04 <- pre_flood_NDVI>0.4
+
+
+  flood_raster_NDVI_list <- list()
+
+  for (i in seq_along(flood_rasters_path)) {
+    flood_raster <- terra::rast(flood_rasters_path[i])
+    flood_NDVI <- NDVI(raster = flood_raster)
+    flood_NDVI_gt_04 <- flood_NDVI>0.4
+
+    flood_raster_NDVI_list[[i]] <- flood_NDVI_gt_04
+  }
+
 
 
 }
