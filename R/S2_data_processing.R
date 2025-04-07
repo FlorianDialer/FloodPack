@@ -82,7 +82,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   if(length(rasters_list) < 2){
     final_data_S2 <- rasters_list[[1]]
   } else  {
-    final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = max))
+    final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = min))
   }
 
   final_data_directory <- file.path(getwd(), "final_data")
