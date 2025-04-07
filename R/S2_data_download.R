@@ -7,10 +7,11 @@
 # https://stackoverflow.com/questions/4216753/folder-management-with-r-check-existence-of-directory-and-create-it-if-it-does
 # https://stackoverflow.com/questions/50479535/cant-suppress-messages-in-blogdown-knitr
 # https://stackoverflow.com/questions/22109774/r-raster-mosaic-from-list-of-rasters
+# https://www.statology.org/r-add-leading-zeros/
 
 
 
-S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 8) {
+S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 12) {
 
   # Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -73,7 +74,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
 
   time_stamps <- sapply(X = granule_json_data_content$value, function(X) X$OriginDate)
-  time_stamps <- lapply(time_stamps, function(X) substr(X, 1, 10))
+  time_stamps <- sapply(time_stamps, function(X) substr(X, 1, 10))
 
   # loop to extract the data extent of each granule for user to chose intersecting tiles to cover AOI fully
   for (footprint_ID in seq_along(footprints)) {
@@ -84,7 +85,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
     footprint_sf <- sf::st_sf(geometry = footprint_wkt)
 
-    sf::st_write(footprint_sf, paste0(temp_directory, "/",footprint_ID,"_", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE, quiet = TRUE)
+    sf::st_write(footprint_sf, paste0(temp_directory, "/", stringr::str_pad(footprint_ID, width = 2, side = "left", pad = "0"),"_", granule_IDs[footprint_ID], "_footprint.gpkg"), delete_layer = TRUE, quiet = TRUE)
   }
 
 
@@ -115,11 +116,11 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
       selected_granules <- backup_granule_IDs[as.numeric(tile_answer)]
     } else {
       for (selected_tiles in tile_answer) {
-        selected_granules[as.numeric(selected_tiles)] <- backup_granule_IDs[as.numeric(selected_tiles)]
+        selected_granules <- backup_granule_IDs[as.numeric(tile_answer)]
       }
     }
 
-  selected_granules <- stats::na.omit(selected_granules)
+  # selected_granules <- stats::na.omit(selected_granules)
   selected_granules <- as.vector(selected_granules)
 
   print("Downloading selected tile(s)...")
