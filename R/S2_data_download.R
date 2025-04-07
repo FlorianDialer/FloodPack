@@ -108,6 +108,9 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 3,4,6):")
   tile_answer <- unlist(strsplit((tile_answer), split = ","))
 
+  graphics.off()
+  unlink(temp_directory, recursive=TRUE)
+
   selected_granules <- vector()
 
   if (length(tile_answer)==0) {
@@ -184,7 +187,6 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
     SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
 
   }
-  unlink(temp_directory, recursive=TRUE)
   print("Download Complete!")
 }
 
