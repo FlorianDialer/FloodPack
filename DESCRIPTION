@@ -19,4 +19,6 @@ Imports:
     terra,
     stats,
     tools,
-    XML
+    XML,
+    stringr,
+    graphics
