@@ -108,7 +108,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 3,4,6):")
   tile_answer <- unlist(strsplit((tile_answer), split = ","))
 
-  graphics.off()
+  grDevices::graphics.off()
   unlink(temp_directory, recursive=TRUE)
 
   selected_granules <- vector()
