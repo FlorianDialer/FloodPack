@@ -26,12 +26,15 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   access_token <- httr::content(request_token, "parsed")$access_token
 
-  #print(access_token)
+  if (is.null(access_token)) {
+    stop("Authentification failed, either Password or Username are wrong. F2A is NOT supported.")
+  }
+
 
   print("Querying results from Copernicus...")
 
   # From aoi.shp/gpkg create Bounding Box and convert to WKT format for the query
-  if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") warning("The provided AOI file needs to be in format .shp or .gpkg!")
+  if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") stop("The provided AOI file needs to be in format .shp or .gpkg!")
 
   aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- sf::st_transform(aoi, crs = "EPSG:4326")
@@ -69,7 +72,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   #check if there is valid data
 
-  if(length(granule_IDs)==0) warning("There are no Sentinel-2 tiles with your selected options!") #needs rework!!
+  if(length(granule_IDs)==0) stop("There are no Sentinel-2 tiles with your selected options!")
 
   footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
 
@@ -101,7 +104,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
     plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps[i]))
     plot(aoi[1,]$geometry, add = TRUE, col = "red")
   }
-
+  unlink(temp_directory, recursive=TRUE)
   backup_granule_IDs <- granule_IDs
 
 
@@ -109,12 +112,12 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   tile_answer <- unlist(strsplit((tile_answer), split = ","))
 
   grDevices::graphics.off()
-  unlink(temp_directory, recursive=TRUE)
+
 
   selected_granules <- vector()
 
   if (length(tile_answer)==0) {
-      warning("No tiles selected! Function will fail!")
+      stop("No tiles selected!")
     } else if (length(tile_answer)==1) {
       selected_granules <- backup_granule_IDs[as.numeric(tile_answer)]
     } else {
