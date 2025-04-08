@@ -71,11 +71,9 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   print("Processing Elevation Data.")
 
-  tile_crs <- terra::crs(terra::rast(pre_flood_raster_path))
-  full_elevation_data_new_crs <- terra::project(full_elevation_data, tile_crs)
-
-
   pre_flood_raster <- terra::rast(pre_flood_raster_path)
+  tile_crs <- terra::crs(pre_flood_raster)
+  full_elevation_data_new_crs <- terra::project(full_elevation_data, tile_crs)
 
 
   cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, pre_flood_raster)
