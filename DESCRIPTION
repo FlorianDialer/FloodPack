@@ -22,4 +22,5 @@ Imports:
     XML,
     stringr,
     graphics,
-    magrittr
+    magrittr,
+    geodata
