@@ -68,17 +68,24 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
 
   #Convert elevation data to S2 raster CRS
+
+  print("Processing Elevation Data.")
+
   tile_crs <- terra::crs(terra::rast(pre_flood_raster_path))
   full_elevation_data_new_crs <- terra::project(full_elevation_data, tile_crs)
-  aoi <- sf::st_transform(aoi, crs = tile_crs)
 
-  cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, aoi)
-  final_elevation_data <- terra::mask(cropped_elevation_data, aoi)
+
+  pre_flood_raster <- terra::rast(pre_flood_raster_path)
+
+
+  cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, pre_flood_raster)
+  resampled_elevation_data <- terra::resample(cropped_elevation_data, pre_flood_raster)
+  final_elevation_data <- terra::mask(resampled_elevation_data, pre_flood_raster)
 
 
   #Convert Elevation Data to Slope for Mask
 
-  slope <- terra::terrain(final_elevation_data, v="slope", neighbors=8, unit="degrees")
+  slope <- terra::terrain(final_elevation_data[[1]], v="slope", neighbors=8, unit="degrees")
 
   percent_slope <- tan(slope*pi/180)*100 #based on YamCham (2021) Stack Exchange
 
@@ -87,12 +94,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
  #NDVI Calculations
 
-  pre_flood_raster <- terra::rast(pre_flood_raster_path)
-  pre_flood_NDVI <- NDVI(raster = pre_flood_raster)
-  pre_flood_NDVI_gt_04 <- pre_flood_NDVI>0.4
-
-  terra::writeRaster(pre_flood_NDVI_gt_04, filename = paste0(SFMI_data_directory, "/pre_flood_NDVI_gt_04.TIF"), overwrite = TRUE)
-
+  print("Calculating NDVI.")
 
   flood_raster_NDVI_list <- list()
 
@@ -105,13 +107,13 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
   }
 
 
+
   #SFMI Calculations
+
+  print("Calculating SFMI.")
 
   pre_flood_SFMI <- SFMI(raster = pre_flood_raster)
   pre_flood_SFMI_gt_0 <- pre_flood_SFMI>0
-
-  terra::writeRaster(pre_flood_SFMI_gt_0, filename = paste0(SFMI_data_directory, "/pre_flood_SFMI_gt_0.TIF"), overwrite = TRUE)
-
 
 
   flood_raster_SFMI_list <- list()
@@ -123,6 +125,34 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
     flood_raster_SFMI_list[[i]] <- flood_SFMI_gt_0
   }
+
+
+  #Calculate binary mask for water/flood areas
+
+  print("Creating Final Flood Areas.")
+
+  final_SFMI_list <- list()
+  final_polygons <- list()
+
+  for (i in seq_along(flood_raster_SFMI_list)) {
+
+    difference_raster <- flood_raster_SFMI_list[[i]] - pre_flood_SFMI_gt_0
+
+    final_SFMI <- difference_raster - (flood_raster_NDVI_list[[i]] + percent_slope_gt_15)
+
+    final_SFMI_binary <- final_SFMI == 1
+
+    final_SFMI_binary_masked <- terra::mask(final_SFMI, final_SFMI_binary, maskvalues = 0)
+
+    final_SFMI_list[[i]] <- final_SFMI_binary_masked
+    terra::writeRaster(final_SFMI_list[[i]], filename = paste0(SFMI_data_directory, glue::glue("/SFMI_flood_0{i}.TIF")), overwrite = TRUE)
+
+    final_polygons[[i]] <- terra::as.polygons(final_SFMI_binary_masked)
+    terra::writeVector(final_polygons[[i]], filename = paste0(SFMI_data_directory, glue::glue("/SFMI_flood_0{i}.gpkg")), overwrite = TRUE)
+
+  }
+
+  print("Calculations Complete!")
 
 }
 
