@@ -142,10 +142,16 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
     final_SFMI_binary_masked <- terra::mask(final_SFMI, final_SFMI_binary, maskvalues = 0)
 
+    date_info <- as.character(terra::time(final_SFMI_binary_masked))
+
     final_SFMI_list[[i]] <- final_SFMI_binary_masked
     terra::writeRaster(final_SFMI_list[[i]], filename = paste0(SFMI_data_directory, "/SFMI_flood_", stringr::str_pad(i, width = 2, side = "left", pad = "0"), ".TIF"), overwrite = TRUE)
 
+
     final_polygons[[i]] <- terra::as.polygons(final_SFMI_binary_masked)
+
+    final_polygons[[i]]$date <- date_info
+
     terra::writeVector(final_polygons[[i]], filename = paste0(SFMI_data_directory, "/SFMI_flood_", stringr::str_pad(i, width = 2, side = "left", pad = "0"), ".gpkg"), overwrite = TRUE)
 
   }
