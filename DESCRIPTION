@@ -16,11 +16,9 @@ Imports:
     glue,
     httr,
     sf,
-    terra,
-    stats,
+    terra (>= 1.8.42),
     tools,
     XML,
     stringr,
     graphics,
-    magrittr,
     geodata
