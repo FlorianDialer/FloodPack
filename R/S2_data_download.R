@@ -31,7 +31,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   }
 
 
-  print("Querying results from Copernicus...")
+  message("Querying results from Copernicus...")
 
   # From aoi.shp/gpkg create Bounding Box and convert to WKT format for the query
   if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") stop("The provided AOI file needs to be in format .shp or .gpkg!")
@@ -76,8 +76,8 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
 
-  time_stamps <- sapply(X = granule_json_data_content$value, function(X) X$OriginDate)
-  time_stamps <- sapply(time_stamps, function(X) substr(X, 1, 10))
+  time_stamps <- sapply(X = granule_json_data_content$value, function(X) X$ContentDate$Start)
+  time_stamps_formatted <- unname(sapply(time_stamps, function(X) substr(X, 1, 10)))
 
   # loop to extract the data extent of each granule for user to chose intersecting tiles to cover AOI fully
   for (footprint_ID in seq_along(footprints)) {
@@ -101,7 +101,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   graphics::par(mfrow = c(2, 2))
 
   for (i in seq_along(tile_footprint_sf)) {
-    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps[i]))
+    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps_formatted[i]))
     plot(aoi[1,]$geometry, add = TRUE, col = "red")
   }
   unlink(temp_directory, recursive=TRUE)
@@ -129,7 +129,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   # selected_granules <- stats::na.omit(selected_granules)
   selected_granules <- as.vector(selected_granules)
 
-  print("Downloading selected tile(s)...")
+  message("Downloading selected tile(s)...")
 
   headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
@@ -168,13 +168,19 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
     nodes_4_content <- httr::content(nodes_4)$result[[1]]$Name[1]
 
     nodes_5 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes({nodes_4_content})/Nodes"))
-    nodes_5_content_B02 <- httr::content(nodes_5)$result[[2]]$Name
-    nodes_5_content_B03 <- httr::content(nodes_5)$result[[3]]$Name
-    nodes_5_content_B04 <- httr::content(nodes_5)$result[[4]]$Name
-    nodes_5_content_B08 <- httr::content(nodes_5)$result[[5]]$Name
+    nodes_5_content <- httr::content(nodes_5)$result
+    nodes_5_band_names <- sapply(nodes_5_content, function(X) X$Name)
+
+    nodes_5_content_B02 <- nodes_5_band_names[grepl("_B02_", nodes_5_band_names)]
+    nodes_5_content_B03 <- nodes_5_band_names[grepl("_B03_", nodes_5_band_names)]
+    nodes_5_content_B04 <- nodes_5_band_names[grepl("_B04_", nodes_5_band_names)]
+    nodes_5_content_B08 <- nodes_5_band_names[grepl("_B08_", nodes_5_band_names)]
 
     nodes_6 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes(R20m)/Nodes"))
-    nodes_6_content_SCL <- httr::content(nodes_6)$result[[12]]$Name
+    nodes_6_content <- httr::content(nodes_6)$result
+
+    nodes_6_band_names <- sapply(nodes_6_content, function(X) X$Name)
+    nodes_6_content_SCL <- nodes_6_band_names[grepl("_SCL_", nodes_6_band_names)]
 
     granule_directory <- file.path(temp_data_condition_directory, granule_ID)
 
@@ -190,7 +196,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
     SCL <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes(IMG_DATA)/Nodes(R20m)/Nodes({nodes_6_content_SCL})/$value"), headers, httr::write_disk(paste0(granule_directory, glue::glue("/{granule_ID}_SCL.jp2")), overwrite = T))
 
   }
-  print("Download Complete!")
+  message("Download Complete!")
 }
 
 
