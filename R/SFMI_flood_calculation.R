@@ -40,7 +40,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   # Nested Loop through all longitudes and latitudes to cover AOI fully
 
-  print("Downloading SRTM Elevation Data. This may take a while, depending on server availability.")
+  message("Downloading SRTM Elevation Data. This may take a while, depending on server availability.")
 
   for (longitude in c(lon_min:lon_max)) {
     for (latitude in c(lat_min:lat_max)) {
@@ -69,7 +69,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #Convert elevation data to S2 raster CRS
 
-  print("Processing Elevation Data.")
+  message("Processing Elevation Data.")
 
   pre_flood_raster <- terra::rast(pre_flood_raster_path)
   tile_crs <- terra::crs(pre_flood_raster)
@@ -92,7 +92,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
  #NDVI Calculations
 
-  print("Calculating NDVI.")
+  message("Calculating NDVI.")
 
   flood_raster_NDVI_list <- list()
 
@@ -108,7 +108,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #SFMI Calculations
 
-  print("Calculating SFMI.")
+  message("Calculating SFMI.")
 
   pre_flood_SFMI <- SFMI(raster = pre_flood_raster)
   pre_flood_SFMI_gt_0 <- pre_flood_SFMI>0
@@ -127,7 +127,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #Calculate binary mask for water/flood areas
 
-  print("Creating Final Flood Areas.")
+  message("Creating Final Flood Areas.")
 
   final_SFMI_list <- list()
   final_polygons <- list()
@@ -156,7 +156,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   }
 
-  print("Calculations Complete!")
+  message("Calculations Complete!")
 
 }
 
