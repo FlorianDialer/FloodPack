@@ -30,6 +30,8 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   message("Applying Cloud Mask and Cropping to AOI...")
 
   for (i in seq_along(jp2s)) {
+    message("Currently processing tile ", i, " of ", length(jp2s))
+
     tile_jp2s <- jp2s[[i]]
 
     tile_bands<- tile_jp2s[!grepl("SCL", tile_jp2s)]
