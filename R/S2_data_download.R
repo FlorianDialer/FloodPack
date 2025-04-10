@@ -161,11 +161,11 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
     nodes_2 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes"))
     nodes_2_content <- httr::content(nodes_2)$result[[1]]$Name[1]
 
-    nodes_3 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes"))
-    nodes_3_content <- httr::content(nodes_3)$result[[2]]$Name[1]
+    #nodes_3 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes"))
+    nodes_3_content <- "IMG_DATA"
 
-    nodes_4 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes"))
-    nodes_4_content <- httr::content(nodes_4)$result[[1]]$Name[1]
+    #nodes_4 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes"))
+    nodes_4_content <- "R10m"
 
     nodes_5 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes({nodes_4_content})/Nodes"))
     nodes_5_content <- httr::content(nodes_5)$result
