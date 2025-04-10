@@ -3,8 +3,9 @@
 
 S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condition) {
 
+  message("Reading in Data...")
 
-  if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") warning("The provided AOI file needs to be in format .shp or .gpkg!")
+  if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") stop("The provided AOI file needs to be in format .shp or .gpkg!")
 
   aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- aoi[1,]
@@ -13,7 +14,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   tiles <- list.dirs(path = file.path(getwd(), "temp_data_directory", condition), full.names = T)
   tiles <- tiles[-1]
 
-  if(length(tiles)==0) warning("Unvalid condition provided!")
+  if(length(tiles)==0) stop("Unvalid condition provided!")
 
 
   xmls <- lapply(tiles, function(tiles) {
@@ -25,6 +26,8 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   })
 
   rasters_list <- list()
+
+  message("Applying Cloud Mask and Cropping to AOI...")
 
   for (i in seq_along(jp2s)) {
     tile_jp2s <- jp2s[[i]]
@@ -82,6 +85,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   if(length(rasters_list) < 2){
     final_data_S2 <- rasters_list[[1]]
   } else  {
+    message("Creating Raster Mosaic...")
     final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = min))
   }
 
@@ -90,9 +94,9 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   if (!dir.exists(final_data_directory)) {
     dir.create(final_data_directory)
   }
-
+  message("Creating Final Raster...")
   terra::writeRaster(x = final_data_S2, filename = paste0(final_data_directory, glue::glue("/{condition}.TIF")), overwrite = TRUE)
-
+  message("Processing Complete!")
 
 }
 
