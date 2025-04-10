@@ -9,7 +9,9 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   pre_flood_raster_path <- files_in_final_data[grepl("pre", files_in_final_data)]
 
-  if (length(pre_flood_raster_path)>1) warning("There can only be one pre_flood raster!")
+  if (length(pre_flood_raster_path)>1) stop("There can only be one pre_flood raster!")
+
+  if (length(pre_flood_raster_path)==0) stop('Missing pre_flood raster! Please provide a raster that includes "pre" in its name.')
 
   flood_rasters_path <- files_in_final_data[!grepl("pre", files_in_final_data)]
 
@@ -40,7 +42,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   # Nested Loop through all longitudes and latitudes to cover AOI fully
 
-  message("Downloading SRTM Elevation Data. This may take a while, depending on server availability.")
+  message("Downloading SRTM Elevation Data. This may take a while, depending on server availability...")
 
   for (longitude in c(lon_min:lon_max)) {
     for (latitude in c(lat_min:lat_max)) {
@@ -69,7 +71,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #Convert elevation data to S2 raster CRS
 
-  message("Processing Elevation Data.")
+  message("Processing Elevation Data...")
 
   pre_flood_raster <- terra::rast(pre_flood_raster_path)
   tile_crs <- terra::crs(pre_flood_raster)
@@ -92,7 +94,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
  #NDVI Calculations
 
-  message("Calculating NDVI.")
+  message("Calculating NDVI...")
 
   flood_raster_NDVI_list <- list()
 
@@ -108,7 +110,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #SFMI Calculations
 
-  message("Calculating SFMI.")
+  message("Calculating SFMI...")
 
   pre_flood_SFMI <- SFMI(raster = pre_flood_raster)
   pre_flood_SFMI_gt_0 <- pre_flood_SFMI>0
@@ -127,7 +129,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
   #Calculate binary mask for water/flood areas
 
-  message("Creating Final Flood Areas.")
+  message("Creating Final Flood Areas...")
 
   final_SFMI_list <- list()
   final_polygons <- list()
