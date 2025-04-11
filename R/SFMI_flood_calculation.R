@@ -21,7 +21,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
   #Prepare Query - extract Latitude and Longitude values
   aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- sf::st_transform(aoi, "EPSG:4326")
-  bbox <- sf::st_bbox(aoi)
+  bbox <- sf::st_bbox(aoi[1,])
   lon_min <- floor(bbox[1])
   lon_max <- ceiling(bbox[3])
   lat_min <- floor(bbox[2])
