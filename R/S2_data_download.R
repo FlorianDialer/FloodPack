@@ -31,7 +31,11 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   }
 
 
-  message("Querying results from Copernicus...")
+  message("Querying results from Copernicus, this may take a while...")
+
+  if (number_of_results>12) {
+    message("A high value of number_if_results may fail depending on API load.")
+  }
 
   # From aoi.shp/gpkg create Bounding Box and convert to WKT format for the query
   if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") stop("The provided AOI file needs to be in format .shp or .gpkg!")
@@ -72,7 +76,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   #check if there is valid data
 
-  if(length(granule_IDs)==0) stop("There are no Sentinel-2 tiles with your selected options!")
+  if(length(granule_IDs)==0) stop("There are no Sentinel-2 tiles with your selected options! Try to change/check dates, cloud_cover_percentage etc. or run the function again.")
 
   footprints <- sapply(X = granule_json_data_content$value, function(X) X$Footprint)
 
@@ -102,7 +106,14 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   for (i in seq_along(tile_footprint_sf)) {
     plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps_formatted[i]))
-    plot(aoi[1,]$geometry, add = TRUE, col = "red")
+
+    if (any(names(aoi)=="geometry")==TRUE) {
+      plot(aoi[1,]$geometry, add = TRUE, col = "red")
+    } else if (any(names(aoi)=="geom")==TRUE) {
+      plot(aoi[1,]$geom, add = TRUE, col = "red")
+    } else {
+      stop("There was an error plotting your AOI, make sure that only you desired shape is in your shp./gpkg. file containing the geometry.")
+    }
   }
   unlink(temp_directory, recursive=TRUE)
   backup_granule_IDs <- granule_IDs
