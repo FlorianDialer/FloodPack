@@ -21,4 +21,9 @@ Imports:
     XML,
     stringr,
     graphics,
-    geodata
+    geodata,
+    ggplot2,
+    ggspatial,
+    tidyterra,
+    viridis,
+    basemaps
