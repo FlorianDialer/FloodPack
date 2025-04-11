@@ -64,6 +64,10 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
     flood_areas_list[[i]]$date
   })
 
+  #CRS extraction for map
+  crs_for_map <- sf::st_crs(flood_areas_list[[1]])$input
+
+
   mapframe <- ggplot2::ggplot() +
     tidyterra::geom_spatraster_rgb(data = basemap_reprojected) +
     ggplot2::coord_sf() +
@@ -76,7 +80,7 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
     ggspatial::annotation_scale(location = "bl") +
     ggspatial::annotation_north_arrow(location = "tr", style = ggspatial::north_arrow_fancy_orienteering)+
     ggplot2::labs(title = title, x = x_axis, y = y_axis, fill = name_of_flood_areas, color = name_of_aoi_in_legend,
-                  caption = "Data Providers: \nCopernicus Sentinel-2 (processed by ESA) (2021). DOI: https://doi.org/10.5270/S2_-6eb6imz \nCarto (2025). URL: https://carto.com/basemaps \nFlood Index: Farhadi et al. (2025). DOI: https://doi.org/10.1016/j.cageo.2024.105742")+
+                  caption = paste("Coordinate Reference System:", crs_for_map, "\nData Providers: Copernicus Sentinel-2 (processed by ESA) (2021). DOI: https://doi.org/10.5270/S2_-6eb6imz; Carto (2025). URL: https://carto.com/basemaps \nFlood Index: Farhadi et al. (2025). DOI: https://doi.org/10.1016/j.cageo.2024.105742"))+
     ggplot2::theme(plot.title = ggplot2::element_text(size = 18, hjust = 0.5), axis.title = ggplot2::element_text(size = 14), legend.title = ggplot2::element_text(size = 14),
                    plot.caption = ggplot2::element_text(hjust = 0))
 
@@ -104,4 +108,3 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
 }
 
 
-#CRS name missing ggplot2
