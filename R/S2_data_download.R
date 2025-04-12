@@ -140,8 +140,6 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   # selected_granules <- stats::na.omit(selected_granules)
   selected_granules <- as.vector(selected_granules)
 
-  message("Downloading selected tile(s)...")
-
   headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
 
@@ -163,6 +161,9 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   # get bands based on user choosing AOI
   for (granule_ID in selected_granules) {
+
+    message(paste0("Downloading selected tile ", which(selected_granules==granule_ID), " of ", length(selected_granules), "..." ))
+
 
     nodes_base_url <- glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({granule_ID})/Nodes")
 
