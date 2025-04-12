@@ -66,7 +66,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   granule_json_data_content <- httr::content(granule_json_data, "parsed")
 
 
-  #Let user choose tiles based on result
+  #Extract IDs of results
   granule_IDs <- sapply(X = granule_json_data_content$value, function(X) X$Id)
 
 

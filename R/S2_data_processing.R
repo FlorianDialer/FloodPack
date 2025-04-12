@@ -5,12 +5,13 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
 
   message("Reading in Data...")
 
+  #Reading AOI files and checking for correct extension
   if(tools::file_ext(aoi) != "shp" & tools::file_ext(aoi) != "gpkg") stop("The provided AOI file needs to be in format .shp or .gpkg!")
 
   aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- aoi[1,]
 
-
+  #Reading Tiles and grabbing files by their extension
   tiles <- list.dirs(path = file.path(getwd(), "temp_data_directory", condition), full.names = T)
   tiles <- tiles[-1]
 
@@ -25,20 +26,24 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
     list.files(path = tiles, pattern = "\\.jp2$", full.names = TRUE, recursive = FALSE)
   })
 
-  rasters_list <- list()
 
+  #Processing Tiles individually
   message("Applying Cloud Mask and Cropping to AOI...")
+
+  rasters_list <- list()
 
   for (i in seq_along(jp2s)) {
     message("Currently processing tile ", i, " of ", length(jp2s))
 
     tile_jp2s <- jp2s[[i]]
 
+    #Getting bands and Scene Classification Mask
     tile_bands<- tile_jp2s[!grepl("SCL", tile_jp2s)]
     tile_scl <- tile_jp2s[grepl("SCL", tile_jp2s)]
 
     tile_bands_rast <- terra::rast(tile_bands)
 
+    #Making sure that all raster files have the same CRS
     if (terra::crs(tile_bands_rast) != terra::crs(terra::rast(jp2s[[1]][1]))) {
       tile_bands_rast <- terra::project(tile_bands_rast, terra::crs(terra::rast(jp2s[[1]][1])))
     }
@@ -49,13 +54,16 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
       tile_SCL_rast <- terra::project(tile_SCL_rast, terra::crs(terra::rast(jp2s[[1]][1])))
     }
 
+    #Resampling Scene Classification Mask due to 20m resolution (bands 10m), nearest neighbour because of discontinuous data
     tile_SCL_rast_resampled <- terra::resample(x = tile_SCL_rast, y = tile_bands_rast, method = "near")
 
+    #Creating mask by setting values corresponding to vegetation, water and built-up to NA
     tile_SCL_rast_resampled[tile_SCL_rast_resampled == 4 | tile_SCL_rast_resampled == 5 | tile_SCL_rast_resampled == 6] <- NA
 
+    #Masking with inverse TRUE so that other values get removed and only 4,5,6 persist
     masked_bands <- terra::mask(tile_bands_rast, tile_SCL_rast_resampled, inverse = TRUE)
 
-
+    #Transforming AOI to CRS of raster layers for cropping and masking
     tile_crs <- terra::crs(masked_bands)
 
     aoi_with_tile_CRS <- sf::st_transform(aoi, crs = tile_crs)
@@ -63,8 +71,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
     cropped_to_aoi <- terra::crop(masked_bands, aoi_with_tile_CRS)
     masked_to_aoi <- terra::mask(cropped_to_aoi, mask = aoi_with_tile_CRS)
 
-    #Adding Time Stamp
-
+    #Adding Time Stamp from meta_data file
     tile_xml <- xmls[[i]]
 
     tile_xml_information <- XML::xmlParse(tile_xml)
@@ -72,8 +79,10 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
     production_time_info <- XML::xmlValue(tile_xml_roots[[1]][[1]][[1]])
     production_time <- as.vector(production_time_info)
 
+    #Formatting as a time object, UTC to circumvent local time zone of user
     production_time_formatted <- strptime(production_time, format = "%Y-%m-%d", tz = "UTC")
 
+    #Creating time object for every band in SpatRaster as global time setting not possible
     layers <- terra::nlyr(masked_to_aoi)
     date_of_production <- rep(production_time_formatted, layers)
 
@@ -83,7 +92,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
 
   }
 
-
+  # Checking if mosaic creation is necessary, mosaic with min setting so that unclean cloud values get overwritten
   if(length(rasters_list) < 2){
     final_data_S2 <- rasters_list[[1]]
   } else  {
@@ -91,11 +100,13 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
     final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = min))
   }
 
+  #Creating folder for writing final raster object
   final_data_directory <- file.path(getwd(), "final_data")
 
   if (!dir.exists(final_data_directory)) {
     dir.create(final_data_directory)
   }
+
   message("Creating Final Raster...")
   terra::writeRaster(x = final_data_S2, filename = paste0(final_data_directory, glue::glue("/{condition}.TIF")), overwrite = TRUE)
   message("Processing Complete!")
