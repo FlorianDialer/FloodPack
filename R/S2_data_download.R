@@ -1,14 +1,39 @@
-# https://www.etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/#making-post-requests-from-r
-# https://dataspace.copernicus.eu/news/2023-9-28-accessing-sentinel-mission-data-new-copernicus-data-space-ecosystem-apis
-# https://documentation.dataspace.copernicus.eu/APIs/OData.html#list-of-odata-query-attributes-by-collection
-# https://cran.r-project.org/web/packages/httr/httr.pdf
-# https://www.dataquest.io/blog/apply-functions-in-r-sapply-lapply-tapply/
-# https://gis.stackexchange.com/questions/233670/sentinel2-get-jpeg200-bands-only
-# https://stackoverflow.com/questions/4216753/folder-management-with-r-check-existence-of-directory-and-create-it-if-it-does
-# https://stackoverflow.com/questions/50479535/cant-suppress-messages-in-blogdown-knitr
-# https://stackoverflow.com/questions/22109774/r-raster-mosaic-from-list-of-rasters
-# https://www.statology.org/r-add-leading-zeros/
-
+#' Download Sentinel-2 Data for Flood Mapping via the Copernicus API
+#'
+#' @param username Your Username from Copernicus Dataspace as a String
+#' @param password Your Password from Copernicus Dataspace as a String
+#' @param start_date First Date Parameter as a String
+#' @param end_date Second Date Parameter as a String
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
+#' @param cloud_cover_percent Maximum allowed Percentage of Cloud Cover on Image as an Integer
+#' @param number_of_results Number of Results that are returend by the Copernicus API as an Integer
+#'
+#' @returns The unprocessed raw Sentinel-2 Bands required for Flood Calculations in the Working Directory in the folder "raw-data"
+#' @export
+#'
+#' @examples
+#'
+#'username <- "your-email-adress'AT'mail.com"
+#'
+#'password <- "your-password"
+#'
+#'start_date <- "2024-12-31"
+#'
+#'end_date <- "2025-01-28"
+#'
+#'aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#'
+#'condition <- "pre_flood" | "flood_01" | "flood_10"
+#'
+#'cloud_cover_percent <- 30
+#'
+#'number_of_results <- 12
+#'
+#'
+#'
+#'
+#'
 
 
 S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 12) {
@@ -140,18 +165,18 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
 
   #Create data folder if it doesn't exist yet
-  temp_data_directory <- file.path(getwd(), "temp_data_directory")
+  raw_data_directory <- file.path(getwd(), "raw_data")
 
-  if (!dir.exists(temp_data_directory)) {
-    dir.create(temp_data_directory)
+  if (!dir.exists(raw_data_directory)) {
+    dir.create(raw_data_directory)
   }
 
 
   #Create condition subdirectory
-  temp_data_condition_directory <- file.path(temp_data_directory, condition)
+  raw_data_condition_directory <- file.path(raw_data_directory, condition)
 
-  if (!dir.exists(temp_data_condition_directory)) {
-    dir.create(temp_data_condition_directory)
+  if (!dir.exists(raw_data_condition_directory)) {
+    dir.create(raw_data_condition_directory)
   }
 
 
@@ -195,7 +220,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
 
     #Directory for downloaded data
-    granule_directory <- file.path(temp_data_condition_directory, granule_ID)
+    granule_directory <- file.path(raw_data_condition_directory, granule_ID)
 
     if (!dir.exists(granule_directory)) {
       dir.create(granule_directory)
