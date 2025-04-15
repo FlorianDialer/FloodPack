@@ -152,7 +152,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
 
     final_SFMI_binary_masked <- terra::mask(final_SFMI, final_SFMI_binary, maskvalues = 0)
 
-    #Extracting data information for polygons as it would be lost otherwise
+    #Extracting date information for polygons as it would be lost otherwise
     date_info <- as.character(terra::time(final_SFMI_binary_masked))
 
     #Writing raster files
