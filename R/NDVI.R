@@ -1,4 +1,10 @@
-#Calculate NDVI
+#' NDVI Calculation
+#'
+#' @param raster
+#'
+#' @returns Spatraster
+#'
+#'
 
 NDVI <- function(raster){
 

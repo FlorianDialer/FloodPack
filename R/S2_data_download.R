@@ -31,9 +31,6 @@
 #'number_of_results <- 12
 #'
 #'
-#'
-#'
-#'
 
 
 S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 12) {

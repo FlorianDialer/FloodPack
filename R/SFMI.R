@@ -1,4 +1,9 @@
-#Calculate SFMI
+#' SFMI Calculation
+#'
+#' @param raster
+#'
+#' @returns Spatraster
+#'
 
 SFMI <- function(raster){
 

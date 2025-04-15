@@ -57,7 +57,4 @@ cloud_cover_percent <- 30
 number_of_results <- 12
 
 
-
-
-
 }

@@ -12,6 +12,7 @@
 #'
 #' condition <- "pre_flood" | "flood_01" | "flood_10"
 
+
 S2_data_processing <- function(aoi, condition) {
 
   message("Reading in Data...")

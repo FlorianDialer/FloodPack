@@ -1,8 +1,20 @@
-# SFMI Idea from: https://www.sciencedirect.com/science/article/pii/S0098300424002255
+#' Calculate Flood Areas based on Sentinel-2 Bands
+#'
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param path_to_rasters Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String
+#'
+#' @returns Returns Flood Areas inside the AOI in Raster and Vector format named ascending in the Working Directory in the folder "flood_data" ; also returns an Elevation Folder in the Working Directory necessary for processing which can be ignored/deleted
+#' @export
+#'
+#' @examples
+#'
+#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#'
+#' path_to_rasters <- "path-to-folder-containing-processed-data"
+#'
 
-# YamCham (2021) Stack Exchange: https://gis.stackexchange.com/questions/404441/converting-a-degree-slope-raster-to-a-percent-slope-raster-without-a-dem-using
 
-SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "final_data")) {
+SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "processed_data")) {
 
   #Get final raster files for processing
   files_in_final_data <- list.files(path_to_rasters, full.names = TRUE)
@@ -35,7 +47,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "fi
     dir.create(elevation_data_directory)
   }
 
-  SFMI_data_directory <- file.path(getwd(), "SFMI_data")
+  SFMI_data_directory <- file.path(getwd(), "flood_data")
 
   if (!dir.exists(SFMI_data_directory)) {
     dir.create(SFMI_data_directory)
