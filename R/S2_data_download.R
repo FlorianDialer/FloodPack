@@ -34,7 +34,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   message("Querying results from Copernicus, this may take a while...")
 
   if (number_of_results>12) {
-    message("A high value of number_if_results may fail depending on API load.")
+    message("A high value of number_of_results may fail depending on API load.")
   }
 
 
@@ -110,13 +110,8 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   for (i in seq_along(tile_footprint_sf)) {
     plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps_formatted[i]))
 
-    if (any(names(aoi)=="geometry")==TRUE) {
-      plot(aoi[1,]$geometry, add = TRUE, col = "red")
-    } else if (any(names(aoi)=="geom")==TRUE) {
-      plot(aoi[1,]$geom, add = TRUE, col = "red")
-    } else {
-      stop("There was an error plotting your AOI, make sure that only you desired shape is in your shp./gpkg. file containing the geometry.")
-    }
+    plot(sf::st_geometry(aoi[1,]), add = TRUE, col = "red")
+
   }
 
   unlink(temp_directory, recursive=TRUE)
