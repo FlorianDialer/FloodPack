@@ -1,11 +1,40 @@
-#https://rpubs.com/paul4forest/ggplot_lapply
-#https://stackoverflow.com/questions/77533388/using-lapply-to-create-multiple-graphs-in-ggplot2-based-on-group-and-output-the
-#https://stackoverflow.com/questions/34936994/how-to-use-lapply-with-ggplot2-while-indexing-variables
+#' Create a Map displaying calculated Flood Areas
+#'
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param title Define a Title for the Map as a String
+#' @param map_file_name Optional: Define File Name for the Map as a String; Default: "my_flood_map"
+#' @param name_of_aoi_in_legend Optional: Define how your AOI will be named in the Map as a String; Default: "Area of Interest"
+#' @param name_of_flood_areas Optional: Define how your Flood Areas will be named in the Map as a String; Default: "Flood Areas"
+#' @param x_axis Optional: Define how your x-Axis will be named in the Map as a String; Default: "Longitude"
+#' @param y_axis Optional: Define how your y-Axis will be named in the Map as a String; Default: "Latitude"
+#' @param sort_by_flood_size Optional: If you cannot see the Flood Areas clearly, this Option sorts them by size to increase visibility, as a Boolean
+#'
+#' @returns A Map in the Working Directory in the folder "flood_map" in different Formats for Publication
+#' @export
+#'
+#' @examples
+#'
+#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#'
+#' title <- "Floods in Bavaria, Germany 2024"
+#'
+#' map_file_name <- "flood_map_germany"
+#'
+#' name_of_aoi_in_legend <- "Bavaria"
+#'
+#' name_of_flood_areas <- "Inundation Areas"
+#'
+#' x_axis <- "X"
+#'
+#' y_axis <- "Y"
+#'
+#' sort_by_flood_size <- TRUE | FALSE
 
-FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_legend = "Area of Interest", name_of_flood_areas = "Flood Areas", x_axis = "Longitude", y_axis = "Latitude", sort_by_flood_size = FALSE, path_to_SFMI_data = file.path(getwd(), "SFMI_data")) {
+
+FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_aoi_in_legend = "Area of Interest", name_of_flood_areas = "Flood Areas", x_axis = "Longitude", y_axis = "Latitude", sort_by_flood_size = FALSE) {
 
   #Reading in flood area vector files
-  flooded_areas_path <- list.files(path = file.path(getwd(), "SFMI_data"), pattern = "\\.gpkg$", full.names = TRUE, recursive = FALSE)
+  flooded_areas_path <- list.files(path = file.path(getwd(), "flood_data"), pattern = "\\.gpkg$", full.names = TRUE, recursive = FALSE)
 
   flood_areas_list <- list()
 
@@ -30,13 +59,16 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
   aoi_crs_of_rasters <- sf::st_transform(aoi[1,], crs = sf::st_crs(flood_areas_list[[1]]))
   aoi_area <- sf::st_area(aoi_crs_of_rasters)
 
-  #Flooded Area Percent Calculation in Relation to AOI Area
-  flood_area_percent <- list()
-
+  #Flooded Area Percent Calculation in Relation to AOI Area and Label Creation for ggplot
   for (i in seq_along(flood_areas_list)) {
-    flood_area_percent[[i]] <- (flood_areas_list[[i]]$flooded_area) / (aoi_area) * 100
+    flood_areas_list[[i]]$flood_percent <- (flood_areas_list[[i]]$flooded_area) / (aoi_area) * 100
+
+    label <- paste(round(as.numeric(flood_areas_list[[i]]$flood_percent), 2), "% flooded on", flood_areas_list[[i]]$date)
+    flood_areas_list[[i]]$label <- label
   }
 
+  #Combining all flood_areas for easier plotting in ggplot, using dplyr due to name issues in column names which circumvents/ignores them automatically
+  combined_flood_areas <- dplyr::bind_rows(flood_areas_list)
 
   #Basemap Preparation
   message("Preparing Basemap...")
@@ -59,13 +91,6 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
   #Defining Colors and Dates for Flood Areas
   message("Plotting Map...")
 
-  #Colors extracted from viridis with as large as possible spread for distinct color visualization
-  colors <- viridis::viridis(n = length(flood_areas_list), begin = 0, end = 1)
-
-  #Extracting dates from flood area files
-  dates <- lapply(seq_along(flood_areas_list), function(i) {
-    flood_areas_list[[i]]$date
-  })
 
   #CRS extraction for displaying on Map
   crs_for_map <- sf::st_crs(flood_areas_list[[1]])$input
@@ -77,18 +102,14 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
     tidyterra::geom_spatraster_rgb(data = basemap_reprojected) +
     ggplot2::coord_sf() +
 
-    #Display flood areas
-    lapply(seq_along(flood_areas_list), function(i) {
-      ggplot2::geom_sf(data = flood_areas_list[[i]], ggplot2::aes(fill = colors[i]), alpha = 1, lwd = 0)
-    }) +
-
-    #Display flood areas color and label definitions
-    ggplot2::scale_fill_manual(values = colors, labels = paste(round(as.numeric(flood_area_percent), 2), "% flooded on", dates)) +
+    #Plotting and Labeling Flood Areas, automatically coloring areas based on viridis color scale implemented in ggplot
+    ggplot2::geom_sf(data = combined_flood_areas, ggplot2::aes(fill = date), lwd = 0)+
+    ggplot2::scale_fill_viridis_d(labels = combined_flood_areas$label)+
 
     #Display AOI boundary
     ggplot2::geom_sf(data = aoi_crs_of_rasters, ggplot2::aes(color = " "), fill = NA, lwd = 0.8) +
 
-    #Display AOI boundary color definition
+    #Display AOI boundary in legend, color definition
     ggplot2::scale_color_manual(values = c(" " = "darkgrey")) +
 
     #Display scale bar and north arrow
@@ -107,7 +128,7 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
   base::plot(mapframe)
 
   #Creating folder for exporting Map
-  flood_map_directory <- file.path(getwd(), "Flood_Map")
+  flood_map_directory <- file.path(getwd(), "flood_map")
 
   if (!dir.exists(flood_map_directory)) {
     dir.create(flood_map_directory)
@@ -116,9 +137,9 @@ FloodMap <- function(aoi, title = "", map_name = "my_flood_map", name_of_aoi_in_
   message("Saving Map in: ", flood_map_directory)
 
   #Exporting Map in Tiff, PNG and PDF formats for different use cases
-  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_name, ".TIF" ),  dpi = 320, units = "px", limitsize = FALSE))
-  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_name, ".png" ),  dpi = 320, units = "px", limitsize = FALSE))
-  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_name, ".pdf" ),  dpi = 320, units = "px", limitsize = FALSE))
+  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_file_name, ".TIF" ),  dpi = 320, units = "px", limitsize = FALSE))
+  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_file_name, ".png" ),  dpi = 320, units = "px", limitsize = FALSE))
+  suppressMessages(ggplot2::ggsave(mapframe, scale = 1.5, filename = paste0(flood_map_directory, "/", map_file_name, ".pdf" ),  dpi = 320, units = "px", limitsize = FALSE))
 
   #Flushing basemap cache and deleting the temporary basemap folder because of issues that would occur otherwise (function would only run once without local drive issues otherwise)
   basemaps::flush_cache()
