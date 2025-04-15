@@ -1,7 +1,18 @@
-#https://stackoverflow.com/questions/74934891/specifying-layers-when-using-rast-type-xyz-to-convert-data-frame-to-spatra
+#' Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking
+#'
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
+#'
+#' @returns The processed Sentinel-2 bands cropped and masked to your AOI, including Cloud Masking and Mosaic Creation in the Working Directory in the folder "processed-data"
+#' @export
+#'
+#' @examples
+#'
+#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#'
+#' condition <- "pre_flood" | "flood_01" | "flood_10"
 
-
-S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condition) {
+S2_data_processing <- function(aoi, condition) {
 
   message("Reading in Data...")
 
@@ -12,7 +23,7 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   aoi <- aoi[1,]
 
   #Reading Tiles and grabbing files by their extension
-  tiles <- list.dirs(path = file.path(getwd(), "temp_data_directory", condition), full.names = T)
+  tiles <- list.dirs(path = file.path(getwd(), "raw_data", condition), full.names = T)
   tiles <- tiles[-1]
 
   if(length(tiles)==0) stop("Unvalid condition provided!")
@@ -101,14 +112,14 @@ S2_data_processing <- function(path_to_temp_data_directory = getwd(), aoi, condi
   }
 
   #Creating folder for writing final raster object
-  final_data_directory <- file.path(getwd(), "final_data")
+  processed_data_directory <- file.path(getwd(), "processed_data")
 
-  if (!dir.exists(final_data_directory)) {
-    dir.create(final_data_directory)
+  if (!dir.exists(processed_data_directory)) {
+    dir.create(processed_data_directory)
   }
 
   message("Creating Final Raster...")
-  terra::writeRaster(x = final_data_S2, filename = paste0(final_data_directory, glue::glue("/{condition}.TIF")), overwrite = TRUE)
+  terra::writeRaster(x = final_data_S2, filename = paste0(processed_data_directory, glue::glue("/{condition}.TIF")), overwrite = TRUE)
   message("Processing Complete!")
 
 }
