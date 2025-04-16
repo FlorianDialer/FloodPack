@@ -195,14 +195,14 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   #Get user answer and extract the correct granules
   tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 1,4,6):")
-  tile_answer <- unlist(strsplit((tile_answer), split = ","))
+  tile_answer <- as.numeric(unlist(strsplit((tile_answer), split = ",")))
 
   grDevices::graphics.off()
 
   selected_granules <- vector()
 
-  if (length(tile_answer)==0) {
-      stop("No tiles selected!")
+  if (length(tile_answer)==0 | !is.numeric(tile_answer)) {
+      stop("No tiles selected or false input!")
     } else if (length(tile_answer)==1) {
       selected_granules <- backup_granule_IDs[as.numeric(tile_answer)]
     } else {
