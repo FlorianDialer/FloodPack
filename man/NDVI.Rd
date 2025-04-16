@@ -7,7 +7,7 @@
 NDVI(raster)
 }
 \arguments{
-\item{raster}{}
+\item{raster}{Spatraster}
 }
 \value{
 Spatraster

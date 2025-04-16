@@ -22,8 +22,9 @@ Calculate Flood Areas based on Sentinel-2 Bands
 }
 \examples{
 
-aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+aoi <- "link-to-file.shp"
 
 path_to_rasters <- "path-to-folder-containing-processed-data"
+
 
 }

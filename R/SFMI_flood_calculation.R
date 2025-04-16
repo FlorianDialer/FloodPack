@@ -8,11 +8,15 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#' aoi <- "link-to-file.shp"
 #'
 #' path_to_rasters <- "path-to-folder-containing-processed-data"
 #'
-
+#'
+#' @importFrom sf st_read st_transform st_bbox
+#' @importFrom geodata elevation_3s
+#' @importFrom terra rast merge crs project crop resample mask terrain time writeRaster as.polygons writeVector
+#' @importFrom stringr str_pad
 
 SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "processed_data")) {
 

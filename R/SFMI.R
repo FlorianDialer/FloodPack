@@ -1,9 +1,10 @@
 #' SFMI Calculation
 #'
-#' @param raster
+#' @param raster Spatraster
 #'
 #' @returns Spatraster
 #'
+#' @importFrom terra names
 
 SFMI <- function(raster){
 

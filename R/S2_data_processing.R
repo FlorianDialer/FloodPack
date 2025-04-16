@@ -8,10 +8,16 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#' aoi <- "link-to-file.gpkg"
 #'
-#' condition <- "pre_flood" | "flood_01" | "flood_10"
-
+#' condition <- "flood_01"
+#'
+#'
+#' @importFrom tools file_ext
+#' @importFrom sf st_read st_transform
+#' @importFrom terra rast crs project resample mask crop nlyr time mosaic writeRaster
+#' @importFrom XML xmlParse xmlRoot xmlValue
+#' @importFrom glue glue
 
 S2_data_processing <- function(aoi, condition) {
 

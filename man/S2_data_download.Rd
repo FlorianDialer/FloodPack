@@ -12,7 +12,7 @@ S2_data_download(
   aoi,
   condition,
   cloud_cover_percent = 50,
-  number_of_results = 12
+  number_of_results = 6
 )
 }
 \arguments{
@@ -48,13 +48,12 @@ start_date <- "2024-12-31"
 
 end_date <- "2025-01-28"
 
-aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+aoi <- "link-to-file.shp"
 
-condition <- "pre_flood" | "flood_01" | "flood_10"
+condition <- "pre_flood"
 
 cloud_cover_percent <- 30
 
 number_of_results <- 12
-
 
 }

@@ -1,10 +1,10 @@
 #' NDVI Calculation
 #'
-#' @param raster
+#' @param raster Spatraster
 #'
 #' @returns Spatraster
 #'
-#'
+#' @importFrom terra names
 
 NDVI <- function(raster){
 

@@ -40,7 +40,7 @@ Create a Map displaying calculated Flood Areas
 }
 \examples{
 
-aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+aoi <- "link-to-file.gpkg"
 
 title <- "Floods in Bavaria, Germany 2024"
 
@@ -54,5 +54,6 @@ x_axis <- "X"
 
 y_axis <- "Y"
 
-sort_by_flood_size <- TRUE | FALSE
+sort_by_flood_size <- TRUE
+
 }
