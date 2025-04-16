@@ -15,21 +15,22 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.gpkg"
+#'aoi <- "link-to-file.shp"
+#'aoi <- "link-to-file.gpkg"
 #'
-#' title <- "Floods in Bavaria, Germany 2024"
+#'title <- "Floods in Bavaria, Germany 2024"
 #'
-#' map_file_name <- "flood_map_germany"
+#'map_file_name <- "flood_map_germany"
 #'
-#' name_of_aoi_in_legend <- "Bavaria"
+#'name_of_aoi_in_legend <- "Bavaria"
 #'
-#' name_of_flood_areas <- "Inundation Areas"
+#'name_of_flood_areas <- "Inundation Areas"
 #'
-#' x_axis <- "X"
+#'x_axis <- "X"
 #'
-#' y_axis <- "Y"
+#'y_axis <- "Y"
 #'
-#' sort_by_flood_size <- TRUE
+#'sort_by_flood_size <- TRUE
 #'
 #' @importFrom sf st_read st_area st_transform st_crs st_bbox
 #' @importFrom dplyr bind_rows

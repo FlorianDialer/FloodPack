@@ -43,6 +43,7 @@ Create a Map displaying calculated Flood Areas
 }
 \examples{
 
+aoi <- "link-to-file.shp"
 aoi <- "link-to-file.gpkg"
 
 title <- "Floods in Bavaria, Germany 2024"

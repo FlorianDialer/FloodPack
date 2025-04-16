@@ -19,9 +19,12 @@ Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking
 }
 \examples{
 
+aoi <- "link-to-file.shp"
 aoi <- "link-to-file.gpkg"
 
+condition <- "pre_flood"
 condition <- "flood_01"
+condition <- "flood_02"
 
 
 }

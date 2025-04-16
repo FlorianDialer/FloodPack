@@ -8,9 +8,12 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.gpkg"
+#'aoi <- "link-to-file.shp"
+#'aoi <- "link-to-file.gpkg"
 #'
-#' condition <- "flood_01"
+#'condition <- "pre_flood"
+#'condition <- "flood_01"
+#'condition <- "flood_02"
 #'
 #'
 #' @importFrom tools file_ext

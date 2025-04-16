@@ -1,20 +1,20 @@
 #' Download Sentinel-2 Data for Flood Mapping via the Copernicus API
 #'
-#' @param username Your Username from Copernicus Dataspace as a String
+#' @param username Your E-Mail Address from Copernicus Dataspace as a String
 #' @param password Your Password from Copernicus Dataspace as a String
-#' @param start_date First Date Parameter as a String
-#' @param end_date Second Date Parameter as a String
+#' @param start_date First Date Parameter as a String; Format: "YYYY-MM-DD"
+#' @param end_date Second Date Parameter as a String; Format: "YYYY-MM-DD"
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
 #' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
-#' @param cloud_cover_percent Maximum allowed Percentage of Cloud Cover on Image as an Integer
-#' @param number_of_results Number of Results that are returend by the Copernicus API as an Integer
+#' @param cloud_cover_percent Maximum allowed Percentage of Cloud Cover on Satellite Image as an Integer
+#' @param number_of_results Number of Results that are returned by the Copernicus API as an Integer
 #'
 #' @returns The unprocessed raw Sentinel-2 Bands required for Flood Calculations in the Working Directory in the folder "raw-data"
 #' @export
 #'
 #' @examples
 #'
-#'username <- "your-email-adress'AT'mail.com"
+#'username <- "your-email-address'AT'mail.com"
 #'
 #'password <- "your-password"
 #'
@@ -23,8 +23,11 @@
 #'end_date <- "2025-01-28"
 #'
 #'aoi <- "link-to-file.shp"
+#'aoi <- "link-to-file.gpkg"
 #'
 #'condition <- "pre_flood"
+#'condition <- "flood_01"
+#'condition <- "flood_02"
 #'
 #'cloud_cover_percent <- 30
 #'

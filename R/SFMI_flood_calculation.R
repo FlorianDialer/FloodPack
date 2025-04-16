@@ -8,7 +8,8 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.shp"
+#'aoi <- "link-to-file.shp"
+#'aoi <- "link-to-file.gpkg"
 #'
 #' path_to_rasters <- "path-to-folder-containing-processed-data"
 #'
