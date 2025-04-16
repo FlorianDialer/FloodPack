@@ -12,6 +12,7 @@ FloodMap(
   name_of_flood_areas = "Flood Areas",
   x_axis = "Longitude",
   y_axis = "Latitude",
+  caption_text = "",
   sort_by_flood_size = FALSE
 )
 }
@@ -29,6 +30,8 @@ FloodMap(
 \item{x_axis}{Optional: Define how your x-Axis will be named in the Map as a String; Default: "Longitude"}
 
 \item{y_axis}{Optional: Define how your y-Axis will be named in the Map as a String; Default: "Latitude"}
+
+\item{caption_text}{Optional: Define a Caption for your Map as a String; new Line can be created using "BACKSLASHn"; Default: ""}
 
 \item{sort_by_flood_size}{Optional: If you cannot see the Flood Areas clearly, this Option sorts them by size to increase visibility, as a Boolean}
 }

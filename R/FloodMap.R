@@ -7,6 +7,7 @@
 #' @param name_of_flood_areas Optional: Define how your Flood Areas will be named in the Map as a String; Default: "Flood Areas"
 #' @param x_axis Optional: Define how your x-Axis will be named in the Map as a String; Default: "Longitude"
 #' @param y_axis Optional: Define how your y-Axis will be named in the Map as a String; Default: "Latitude"
+#' @param caption_text Optional: Define a Caption for your Map as a String; new Line can be created using "BACKSLASHn"; Default: ""
 #' @param sort_by_flood_size Optional: If you cannot see the Flood Areas clearly, this Option sorts them by size to increase visibility, as a Boolean
 #'
 #' @returns A Map in the Working Directory in the folder "flood_map" in different Formats for Publication
@@ -39,7 +40,7 @@
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
 
 
-FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_aoi_in_legend = "Area of Interest", name_of_flood_areas = "Flood Areas", x_axis = "Longitude", y_axis = "Latitude", sort_by_flood_size = FALSE) {
+FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_aoi_in_legend = "Area of Interest", name_of_flood_areas = "Flood Areas", x_axis = "Longitude", y_axis = "Latitude", caption_text = "", sort_by_flood_size = FALSE) {
 
   #Reading in flood area vector files
   flooded_areas_path <- list.files(path = file.path(getwd(), "flood_data"), pattern = "\\.gpkg$", full.names = TRUE, recursive = FALSE)
@@ -126,7 +127,7 @@ FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_ao
 
     #Display all remaining labels
     ggplot2::labs(title = title, x = x_axis, y = y_axis, fill = name_of_flood_areas, color = name_of_aoi_in_legend,
-                  caption = paste("Coordinate Reference System:", crs_for_map))+
+                  caption = paste0("Coordinate Reference System: ", crs_for_map, "\n", caption_text))+
 
     #Adjust text element positions and sizes
     ggplot2::theme(plot.title = ggplot2::element_text(size = 18, hjust = 0.5), axis.title = ggplot2::element_text(size = 14), legend.title = ggplot2::element_text(size = 14),
