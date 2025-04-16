@@ -14,7 +14,7 @@
 #'
 #' @examples
 #'
-#' aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#' aoi <- "link-to-file.gpkg"
 #'
 #' title <- "Floods in Bavaria, Germany 2024"
 #'
@@ -28,7 +28,15 @@
 #'
 #' y_axis <- "Y"
 #'
-#' sort_by_flood_size <- TRUE | FALSE
+#' sort_by_flood_size <- TRUE
+#'
+#' @importFrom sf st_read st_area st_transform st_crs st_bbox
+#' @importFrom dplyr bind_rows
+#' @importFrom basemaps set_defaults basemap_terra flush_cache
+#' @importFrom terra project
+#' @importFrom ggplot2 ggplot coord_sf geom_sf aes scale_fill_viridis_d scale_color_manual labs theme element_text ggsave
+#' @importFrom tidyterra geom_spatraster_rgb
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
 
 
 FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_aoi_in_legend = "Area of Interest", name_of_flood_areas = "Flood Areas", x_axis = "Longitude", y_axis = "Latitude", sort_by_flood_size = FALSE) {
@@ -118,7 +126,7 @@ FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_ao
 
     #Display all remaining labels
     ggplot2::labs(title = title, x = x_axis, y = y_axis, fill = name_of_flood_areas, color = name_of_aoi_in_legend,
-                  caption = paste("Coordinate Reference System:", crs_for_map, "\nData Providers: Copernicus Sentinel-2 (processed by ESA) (2021). DOI: https://doi.org/10.5270/S2_-6eb6imz; Carto (2025). URL: https://carto.com/basemaps \nFlood Index: Farhadi et al. (2025). DOI: https://doi.org/10.1016/j.cageo.2024.105742"))+
+                  caption = paste("Coordinate Reference System:", crs_for_map))+
 
     #Adjust text element positions and sizes
     ggplot2::theme(plot.title = ggplot2::element_text(size = 18, hjust = 0.5), axis.title = ggplot2::element_text(size = 14), legend.title = ggplot2::element_text(size = 14),
