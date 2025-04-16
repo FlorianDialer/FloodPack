@@ -1,10 +1,10 @@
 Package: FloodPack
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Flood Mapping using Sentinel-2 Data
+Version: 1.0.0
 Authors@R: 
     person("Florian", "Dialer", , "florian.dialer@stud-mail.uni-wuerzburg.de", role = c("aut", "cre"),
                comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: Downloading Sentinel-2 Data, Cropping to an AOI and applying Cloud Mask, Extracting Flood Areas with SFMI and Creating a Map showing the Flood Areas.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
