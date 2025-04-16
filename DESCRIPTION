@@ -19,7 +19,6 @@ Imports:
     tools,
     XML,
     stringr,
-    graphics,
     geodata,
     ggplot2,
     ggspatial,
