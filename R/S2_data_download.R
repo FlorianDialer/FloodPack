@@ -22,18 +22,25 @@
 #'
 #'end_date <- "2025-01-28"
 #'
-#'aoi <- "link-to-file.shp" | "link-to-file.gpkg"
+#'aoi <- "link-to-file.shp"
 #'
-#'condition <- "pre_flood" | "flood_01" | "flood_10"
+#'condition <- "pre_flood"
 #'
 #'cloud_cover_percent <- 30
 #'
 #'number_of_results <- 12
 #'
-#'
+#' @importFrom httr POST content GET add_headers write_disk
+#' @importFrom tools file_ext
+#' @importFrom sf st_read st_transform st_as_sfc st_bbox st_as_text st_sf st_write st_geometry
+#' @importFrom glue glue
+#' @importFrom stringr str_pad
+#' @importFrom terra rast
+#' @importFrom ggplot2 ggplot geom_sf ggtitle coord_sf theme element_text
+#' @importFrom tidyterra geom_spatraster_rgb
+#' @importFrom grDevices graphics.off
 
-
-S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 12) {
+S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 6) {
 
   #Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -55,8 +62,8 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   message("Querying results from Copernicus, this may take a while...")
 
-  if (number_of_results>12) {
-    message("A high value of number_of_results may fail depending on API load.")
+  if (number_of_results>6) {
+    message("A high value of number_of_results may fail depending on API load or takes a long time to process...")
   }
 
 
@@ -122,26 +129,72 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   }
 
 
+
+  #Create header with access_token to authenticate for download via API
+  headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
+
+
+  #Iteratively build strings for finding the correct link/path for downloading Preview Images
+  message("Preparing Preview Images...")
+
+  for (i in granule_IDs) {
+    nodes_base_url <- glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({i})/Nodes")
+
+    nodes_1 <- httr::GET(url = nodes_base_url, headers)
+    nodes_1_content <- httr::content(nodes_1)$result[[1]]$Name[1]
+
+    nodes_2 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes"))
+    nodes_2_content <- httr::content(nodes_2)$result[[1]]$Name[1]
+
+    nodes_3_content <- "QI_DATA"
+
+    nodes_4 <- httr::GET(glue::glue("{nodes_base_url}({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes"))
+    nodes_4_content <- httr::content(nodes_4)$result
+    nodes_4_band_names <- sapply(nodes_4_content, function(X) X$Name)
+
+    nodes_4_content_PVI <- nodes_4_band_names[grepl("PVI", nodes_4_band_names)]
+
+    PVI <- httr::GET(url = glue::glue("https://download.dataspace.copernicus.eu/odata/v1/Products({i})/Nodes({nodes_1_content})/Nodes(GRANULE)/Nodes({nodes_2_content})/Nodes({nodes_3_content})/Nodes({nodes_4_content_PVI})/$value"), headers, httr::write_disk(paste0(temp_directory, "/", stringr::str_pad({which(granule_IDs==i)}, width = 2, side = "left", pad = "0"), glue::glue("_{i}_PVI.jp2")), overwrite = T))
+
+  }
+
   #Creating function for selecting tiles
   tile_footprint_list <- list.files(temp_directory, pattern = "\\.gpkg$", full.names = TRUE)
 
   tile_footprint_sf <- sapply(tile_footprint_list, sf::st_read, quiet = TRUE)
 
-  graphics::par(mfrow = c(2, 2))
+  preview_image_list <- list.files(temp_directory, pattern = "\\.jp2$", full.names = TRUE)
+
+  preview_image_raster <- lapply(preview_image_list, terra::rast)
+
+
 
   for (i in seq_along(tile_footprint_sf)) {
-    plot(tile_footprint_sf[[i]], main = paste0("Tile Nr. ", i, ", Date: ", time_stamps_formatted[i]))
 
-    plot(sf::st_geometry(aoi[1,]), add = TRUE, col = "red")
+    #Extract Elements for Plotting
+    footprint <- tile_footprint_sf[[i]]
+    aoi_geometry <- sf::st_geometry(aoi[1, ])
+    preview_image <- preview_image_raster[[i]]
 
+    #Plotting AOI, the Tile Boundary and the Preview Image
+    preview_map <- ggplot2::ggplot() +
+      tidyterra::geom_spatraster_rgb(data = preview_image) +
+      ggplot2::geom_sf(data = footprint, fill = NA, color = "blue", lwd = 1.5) +
+      ggplot2::geom_sf(data = aoi_geometry, fill = NA, color = "red", lwd = 1.5) +
+      ggplot2::ggtitle(label = paste0("Tile Nr. ", i, ", Date: ", time_stamps_formatted[i])) +
+      ggplot2::coord_sf() +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+
+    plot(preview_map)
   }
 
+  #Remove temp folder and backup the granule IDs for further processing
   unlink(temp_directory, recursive=TRUE)
   backup_granule_IDs <- granule_IDs
 
 
   #Get user answer and extract the correct granules
-  tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 3,4,6):")
+  tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 1,4,6):")
   tile_answer <- unlist(strsplit((tile_answer), split = ","))
 
   grDevices::graphics.off()
@@ -175,10 +228,6 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   if (!dir.exists(raw_data_condition_directory)) {
     dir.create(raw_data_condition_directory)
   }
-
-
-  #Create header with access_token to authenticate for download via API
-  headers <- httr::add_headers(Authorization = glue::glue("Bearer {access_token}"))
 
 
   #Get individual bands based on user choosing tiles
