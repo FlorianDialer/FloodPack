@@ -95,7 +95,11 @@ FloodMap <- function(aoi, title = "", map_file_name = "my_flood_map", name_of_ao
   basemaps::set_defaults(map_service = "carto", map_type = "light", map_res = 1, map_dir = basemap_temp_directory)
 
   basemap <- suppressWarnings(basemaps::basemap_terra(bbox))
-  basemap_reprojected <- terra::project(basemap, flood_areas_list[[1]])
+
+  #Since on Windows there seems to be an issue with UTF8, this converts the CRS securely into UTF8
+  crs_utf8 <- enc2utf8(sf::st_crs(flood_areas_list[[1]])$wkt)
+
+  basemap_reprojected <- terra::project(basemap, crs_utf8)
 
 
   #Defining Colors and Dates for Flood Areas
