@@ -1,6 +1,6 @@
 #' Calculate Flood Areas based on Sentinel-2 Bands
 #'
-#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param path_to_rasters Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String
 #'
 #' @returns Returns Flood Areas inside the AOI in Raster and Vector format named ascending in the Working Directory in the folder "flood_data" ; also returns an Elevation Folder in the Working Directory necessary for processing which can be ignored/deleted
@@ -8,8 +8,8 @@
 #'
 #' @examples
 #'
-#'aoi <- "link-to-file.shp"
-#'aoi <- "link-to-file.gpkg"
+#'aoi <- "path/to/file.shp"
+#'aoi <- "path/to/file.gpkg"
 #'
 #' path_to_rasters <- "path-to-folder-containing-processed-data"
 #'

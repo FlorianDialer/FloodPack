@@ -18,13 +18,13 @@ S2_data_download(
 \arguments{
 \item{username}{Your E-Mail Address from Copernicus Dataspace as a String}
 
-\item{password}{Your Password from Copernicus Dataspace as a String}
+\item{password}{Your Password from Copernicus Dataspace as a String; Warning: Two-factor authentication NOT supported}
 
 \item{start_date}{First Date Parameter as a String; Format: "YYYY-MM-DD"}
 
 \item{end_date}{Second Date Parameter as a String; Format: "YYYY-MM-DD"}
 
-\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg}
+\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand}
 
 \item{condition}{Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension}
 
@@ -48,8 +48,8 @@ start_date <- "2024-12-31"
 
 end_date <- "2025-01-28"
 
-aoi <- "link-to-file.shp"
-aoi <- "link-to-file.gpkg"
+aoi <- "path/to/file.shp"
+aoi <- "path/to/file.gpkg"
 
 condition <- "pre_flood"
 condition <- "flood_01"

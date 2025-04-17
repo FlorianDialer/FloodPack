@@ -1,10 +1,10 @@
 #' Download Sentinel-2 Data for Flood Mapping via the Copernicus API
 #'
 #' @param username Your E-Mail Address from Copernicus Dataspace as a String
-#' @param password Your Password from Copernicus Dataspace as a String
+#' @param password Your Password from Copernicus Dataspace as a String; Warning: Two-factor authentication NOT supported
 #' @param start_date First Date Parameter as a String; Format: "YYYY-MM-DD"
 #' @param end_date Second Date Parameter as a String; Format: "YYYY-MM-DD"
-#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
 #' @param cloud_cover_percent Maximum allowed Percentage of Cloud Cover on Satellite Image as an Integer
 #' @param number_of_results Number of Results that are returned by the Copernicus API as an Integer
@@ -22,8 +22,8 @@
 #'
 #'end_date <- "2025-01-28"
 #'
-#'aoi <- "link-to-file.shp"
-#'aoi <- "link-to-file.gpkg"
+#'aoi <- "path/to/file.shp"
+#'aoi <- "path/to/file.gpkg"
 #'
 #'condition <- "pre_flood"
 #'condition <- "flood_01"
@@ -59,7 +59,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   access_token <- httr::content(request_token, "parsed")$access_token
 
   if (is.null(access_token)) {
-    stop("Authentification failed, either Password or Username are wrong. F2A is NOT supported.")
+    stop("Authentification failed, either Password or Username are wrong. 2FA is NOT supported.")
   }
 
 

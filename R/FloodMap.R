@@ -1,13 +1,13 @@
 #' Create a Map displaying calculated Flood Areas
 #'
-#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param title Define a Title for the Map as a String
 #' @param map_file_name Optional: Define File Name for the Map as a String; Default: "my_flood_map"
 #' @param name_of_aoi_in_legend Optional: Define how your AOI will be named in the Map as a String; Default: "Area of Interest"
 #' @param name_of_flood_areas Optional: Define how your Flood Areas will be named in the Map as a String; Default: "Flood Areas"
 #' @param x_axis Optional: Define how your x-Axis will be named in the Map as a String; Default: "Longitude"
 #' @param y_axis Optional: Define how your y-Axis will be named in the Map as a String; Default: "Latitude"
-#' @param caption_text Optional: Define a Caption for your Map as a String; new Line can be created using "BACKSLASHn"; Default: ""
+#' @param caption_text Optional: Define a Caption for your Map as a String; A new Line can be created using "BACKSLASHn"; Default: empty
 #' @param sort_by_flood_size Optional: If you cannot see the Flood Areas clearly, this Option sorts them by size to increase visibility, as a Boolean
 #'
 #' @returns A Map in the Working Directory in the folder "flood_map" in different Formats for Publication
@@ -15,8 +15,8 @@
 #'
 #' @examples
 #'
-#'aoi <- "link-to-file.shp"
-#'aoi <- "link-to-file.gpkg"
+#'aoi <- "path/to/file.shp"
+#'aoi <- "path/to/file.gpkg"
 #'
 #'title <- "Floods in Bavaria, Germany 2024"
 #'

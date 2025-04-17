@@ -1,6 +1,6 @@
 #' Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking
 #'
-#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg
+#' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
 #'
 #' @returns The processed Sentinel-2 bands cropped and masked to your AOI, including Cloud Masking and Mosaic Creation in the Working Directory in the folder "processed-data"
@@ -8,8 +8,8 @@
 #'
 #' @examples
 #'
-#'aoi <- "link-to-file.shp"
-#'aoi <- "link-to-file.gpkg"
+#'aoi <- "path/to/file.shp"
+#'aoi <- "path/to/file.gpkg"
 #'
 #'condition <- "pre_flood"
 #'condition <- "flood_01"

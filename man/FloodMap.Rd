@@ -17,7 +17,7 @@ FloodMap(
 )
 }
 \arguments{
-\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg}
+\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand}
 
 \item{title}{Define a Title for the Map as a String}
 
@@ -31,7 +31,7 @@ FloodMap(
 
 \item{y_axis}{Optional: Define how your y-Axis will be named in the Map as a String; Default: "Latitude"}
 
-\item{caption_text}{Optional: Define a Caption for your Map as a String; new Line can be created using "BACKSLASHn"; Default: ""}
+\item{caption_text}{Optional: Define a Caption for your Map as a String; A new Line can be created using "BACKSLASHn"; Default: empty}
 
 \item{sort_by_flood_size}{Optional: If you cannot see the Flood Areas clearly, this Option sorts them by size to increase visibility, as a Boolean}
 }
@@ -43,8 +43,8 @@ Create a Map displaying calculated Flood Areas
 }
 \examples{
 
-aoi <- "link-to-file.shp"
-aoi <- "link-to-file.gpkg"
+aoi <- "path/to/file.shp"
+aoi <- "path/to/file.gpkg"
 
 title <- "Floods in Bavaria, Germany 2024"
 

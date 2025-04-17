@@ -10,7 +10,7 @@ SFMI_flood_calculation(
 )
 }
 \arguments{
-\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg}
+\item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand}
 
 \item{path_to_rasters}{Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String}
 }
@@ -22,8 +22,8 @@ Calculate Flood Areas based on Sentinel-2 Bands
 }
 \examples{
 
-aoi <- "link-to-file.shp"
-aoi <- "link-to-file.gpkg"
+aoi <- "path/to/file.shp"
+aoi <- "path/to/file.gpkg"
 
 path_to_rasters <- "path-to-folder-containing-processed-data"
 
