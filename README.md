@@ -5,7 +5,7 @@
 
 <img src="https://img.shields.io/github/r-package/v/FlorianDialer/FloodPack" alt="GitHub R package version"/>
 
-With **FloodPack** you can download and preprocess (cloud Masking, AOI
+With **FloodPack** you can download and preprocess (cloud masking, AOI
 cropping, mosaic-building) Sentinel-2 data, calculate flooded areas for
 multiple dates and create a map for quick and professional
 visualization.
@@ -170,14 +170,14 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 
 ## Limitations
 
-- Tested for AOIs smaller than or equal Sentinel-2 tiles (110 km x 110
-  km), larger AOIs may not work due to function design, Copernicus
+- Tested for AOIs smaller than or equal to Sentinel-2 tiles (110 km x
+  110 km), larger AOIs may not work due to function design, Copernicus
   Dataspace API or local computational limitations
 
 - Copernicus Dataspace two-factor authentication is currently **NOT**
   supported
 
-- Package works only in UTF8 environmet; certain Latin characters may
+- Package works only in UTF8 environment; certain Latin characters may
   cause errors (especially on Windows Operating Systems)
 
 ## References
@@ -185,14 +185,14 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 - European Space Agency. (2022). Sentinel-2 MSI Level-2A BOA Reflectance
   \[Dataset\]. <https://doi.org/10.5270/S2_-znk9xsj>
 
+- FAO GAUL. (1990, 2014). Administrative boundaries (level 2)—GAUL
+  2015—AmeriGEOSS Community Platform DataHub.
+  <https://data.amerigeoss.org/es_AR/dataset/a6baab0a-66b8-47ca-84a2-3553be80a574>
+
 - Farhadi, H., Ebadi, H., Kiani, A., & Asgary, A. (2025). Introducing a
   new index for flood mapping using Sentinel-2 imagery (SFMI). Computers
   & Geosciences, 194, 105742.
   <https://doi.org/10.1016/j.cageo.2024.105742>
-
-- FAO GAUL. (1990, 2014). Administrative boundaries (level 2)—GAUL
-  2015—AmeriGEOSS Community Platform DataHub.
-  <https://data.amerigeoss.org/es_AR/dataset/a6baab0a-66b8-47ca-84a2-3553be80a574>
 
 ## License
 
