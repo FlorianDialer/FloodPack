@@ -11,7 +11,7 @@
 #'aoi <- "path/to/file.shp"
 #'aoi <- "path/to/file.gpkg"
 #'
-#' path_to_rasters <- "path-to-folder-containing-processed-data"
+#' path_to_rasters <- "path/to/folder/containing/processed-data"
 #'
 #'
 #' @importFrom sf st_read st_transform st_bbox
