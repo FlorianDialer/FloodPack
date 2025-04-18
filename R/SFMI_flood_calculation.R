@@ -106,7 +106,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
   #Convert Elevation Data to Slope in Percent for Mask
   slope <- terra::terrain(final_elevation_data[[1]], v="slope", neighbors=8, unit="degrees")
 
-  #Based on YamCham (2021) Stack Exchange
+  #Based on YamCham (2021) Stack Exchange: https://gis.stackexchange.com/questions/404441/converting-a-degree-slope-raster-to-a-percent-slope-raster-without-a-dem-using
   percent_slope <- tan(slope*pi/180)*100
 
   #Mask slope greater 15% according to SFMI paper
