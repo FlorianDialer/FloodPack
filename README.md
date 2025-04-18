@@ -5,15 +5,15 @@
 
 <img src="https://img.shields.io/github/r-package/v/FlorianDialer/FloodPack" alt="GitHub R package version"/>
 
-With **FloodPack** you can download and preprocess (Cloud Masking, AOI
-Cropping, Mosaic-Building) Sentinel-2 Data, calculate flooded Areas for
-multiple dates and create a Map for quick and professional
-Visualization.
+With **FloodPack** you can download and preprocess (cloud Masking, AOI
+cropping, mosaic-building) Sentinel-2 Data, calculate flooded Areas for
+multiple dates and create a map for quick and professional
+visualization.
 
 ## Requirements
 
-An Account at: [Copernicus Dataspace](https://dataspace.copernicus.eu/)
-with valid Username (E-Mail) and Password. Two-factor authentication is
+An account at: [Copernicus Dataspace](https://dataspace.copernicus.eu/)
+with valid username (E-Mail) and password. Two-factor authentication is
 **NOT** supported.
 
 Tested for and with R version 4.4.3 (Trophy Case)
@@ -43,17 +43,17 @@ library(FloodPack)
 
 | **Function Name** | **Description** |
 |----|----|
-| S2_data_download() | Download Sentinel-2 Data for Flood Mapping via the Copernicus API. You can define filter for AOIs, dates and Cloud Cover percentage. |
-| S2_data_processing() | Processing of Sentinel-2 Bands with automatic Cloud Masking, AOI Cropping as well as Mosaic-Building. |
-| SFMI_flood_calculation() | Calculation of flooded Areas with SFMI Index by Farhadi et al. (2025). |
-| FloodMap() | Create a Map displaying calculated Flood Areas based on Date or by Flood Size. |
+| S2_data_download() | Download Sentinel-2 Data for Flood Mapping via the Copernicus API. You can define filter for AOIs, dates and cloud cover percentage. |
+| S2_data_processing() | Processing of Sentinel-2 Bands with automatic cloud Masking, AOI cropping as well as mosaic-building. |
+| SFMI_flood_calculation() | Calculation of flooded areas with SFMI Index by Farhadi et al. (2025). |
+| FloodMap() | Create a map displaying calculated flood areas based on date or by flood size. |
 
 ## Example Workflow
 
 This is a basic workflow example which shows you how use **FloodPack**:
 
 - This example can be recreated by downloading the following AOI
-  Shapefile by FAO GAUL (1990, 2014): [Link to
+  shapefile by FAO GAUL (1990, 2014): [Link to
   GeoPackage](https://1drv.ms/u/c/1bda63fd85cbfc63/EXSrkHSO-6dFuGRboezatA0BkoMTTt4wqjtwuER4nhD0mw?e=GPJsa2)
 
 ### Package Preparation
@@ -164,7 +164,7 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 # Consider trying out other Areas of your Interest!
 ```
 
-### Result of Example: Map
+### Result of Example:
 
 ![](example_images/porto_alegre.png)
 
