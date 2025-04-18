@@ -4,12 +4,14 @@
 \alias{S2_data_processing}
 \title{Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking}
 \usage{
-S2_data_processing(aoi, condition)
+S2_data_processing(aoi, condition, mosaic_method = "min")
 }
 \arguments{
 \item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand}
 
 \item{condition}{Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension}
+
+\item{mosaic_method}{Choose an Option of how the Raster Files get merged; Options: "min", "mean", "max", "modal", "median", "first", "last", "sum" as a String}
 }
 \value{
 The processed Sentinel-2 bands cropped and masked to your AOI, including Cloud Masking and Mosaic Creation in the Working Directory in the folder "processed-data"
@@ -25,6 +27,8 @@ aoi <- "path/to/file.gpkg"
 condition <- "pre_flood"
 condition <- "flood_01"
 condition <- "flood_02"
+
+mosaic_method <- "mean"
 
 
 }

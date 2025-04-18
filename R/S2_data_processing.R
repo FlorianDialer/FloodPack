@@ -2,6 +2,7 @@
 #'
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
+#' @param mosaic_method Choose an Option of how the Raster Files get merged; Options: "min", "mean", "max", "modal", "median", "first", "last", "sum" as a String
 #'
 #' @returns The processed Sentinel-2 bands cropped and masked to your AOI, including Cloud Masking and Mosaic Creation in the Working Directory in the folder "processed-data"
 #' @export
@@ -15,6 +16,8 @@
 #'condition <- "flood_01"
 #'condition <- "flood_02"
 #'
+#'mosaic_method <- "mean"
+#'
 #'
 #' @importFrom tools file_ext
 #' @importFrom sf st_read st_transform
@@ -22,7 +25,7 @@
 #' @importFrom XML xmlParse xmlRoot xmlValue
 #' @importFrom glue glue
 
-S2_data_processing <- function(aoi, condition) {
+S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
 
   message("Reading in Data...")
 
@@ -47,6 +50,11 @@ S2_data_processing <- function(aoi, condition) {
     list.files(path = tiles, pattern = "\\.jp2$", full.names = TRUE, recursive = FALSE)
   })
 
+
+  #Check if user entered a valid mosaic option based on terra's mosaic function
+  if (!any(mosaic_method == c("min", "mean", "max", "modal", "median", "first", "last", "sum"))) {
+    stop("Unvalid mosaic_method chosen! Please refer to the help page for valid options.")
+  }
 
   #Processing Tiles individually
   message("Applying Cloud Mask and Cropping to AOI...")
@@ -113,12 +121,13 @@ S2_data_processing <- function(aoi, condition) {
 
   }
 
-  # Checking if mosaic creation is necessary, mosaic with min setting so that unclean cloud values get overwritten
+
+  # Checking if mosaic creation is necessary, mosaic with min setting is standard so that unclean cloud values get overwritten
   if(length(rasters_list) < 2){
     final_data_S2 <- rasters_list[[1]]
   } else  {
     message("Creating Raster Mosaic...")
-    final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = min))
+    final_data_S2 <- do.call(terra::mosaic, c(rasters_list, fun = mosaic_method))
   }
 
   #Creating folder for writing final raster object
