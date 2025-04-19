@@ -6,7 +6,7 @@
 <img src="https://img.shields.io/github/r-package/v/FlorianDialer/FloodPack" alt="GitHub R package version"/>
 
 With **FloodPack** you can download and preprocess (cloud masking, AOI
-cropping, mosaic-building) Sentinel-2 data, calculate flooded areas for
+cropping, scene-mosaicking) Sentinel-2 data, calculate flooded areas for
 multiple dates and create a map for quick and professional
 visualization.
 
@@ -44,13 +44,14 @@ library(FloodPack)
 | **Function Name** | **Description** |
 |----|----|
 | S2_data_download() | Download Sentinel-2 data for Flood Mapping via the Copernicus API. You can define filter for AOIs, dates and cloud cover percentage. |
-| S2_data_processing() | Processing of Sentinel-2 bands with automatic cloud masking, AOI cropping as well as mosaic-building. |
+| S2_data_processing() | Processing of Sentinel-2 bands with automatic cloud masking, AOI cropping as well as scene-mosaicking. |
 | SFMI_flood_calculation() | Calculation of flooded areas with SFMI Index by Farhadi et al. (2025). |
 | FloodMap() | Create a map displaying calculated flood areas based on date or by flood size. |
 
 ## Example Workflow
 
-This is a basic workflow example which shows you how use **FloodPack**:
+This is a basic workflow example which shows you how to use
+**FloodPack**:
 
 - This example can be recreated by downloading the following AOI
   shapefile by FAO GAUL (1990, 2014): [Link to
@@ -62,7 +63,7 @@ This is a basic workflow example which shows you how use **FloodPack**:
 # LOAD THE PACKAGE:
 library(FloodPack)
 
-# Create a folder in your deaired location and set the working directory to it
+# Create a folder in your desired location and set the working directory to it
 setwd("/Path/to/folder/to/store/data")
 ```
 
@@ -83,11 +84,16 @@ aoi <- "path/to/porto-alegre-AOI.gpkg"
 cloud_cover_percent <- 30
 # How many images will be shown to you for choosing Sentinel-2 tile(s)
 number_of_results <- 4
+```
 
+This example looks at the 2024 Rio Grande do Sul floods. Define which
+images you want to download (you need at least one image as a
+“pre_flood” and a “flood_xx” raster generally). Within this function you
+will be prompted to select the tiles you want to download. You can
+either download one tile or more by splitting the tile numbers with
+commas (,).
 
-# This example looks at the 2024 Rio Grande do Sul floods 
-# Define which image you want to download (you need at least one image as a "pre_flood" and a "flood_xx" raster generally)
-
+``` r
 # Only run one condition and start_ & end-date at a time and proceed to run S2_data_download() repeatedly to download the correct tiles
 
 # pre_flood image: 2024-04-18
@@ -115,7 +121,7 @@ condition <- "flood_04"
 start_date <- "2024-07-21"
 end_date <- "2024-07-23"
 
-# Run the function repeatedly with the conditions and start_ & end-date to download the correctly dated tiles
+# Run the function repeatedly with the conditions and start_ & end-date to download the tiles with the correct dates
 S2_data_download(username = username, password = password, condition = condition, start_date = start_date, end_date = end_date, aoi = aoi, cloud_cover_percent = cloud_cover_percent, number_of_results = number_of_results)
 ```
 
@@ -124,7 +130,7 @@ S2_data_download(username = username, password = password, condition = condition
 ``` r
 # DATA PROCESSING OF SENTINEL-2 TILES:
 
-# Optional: define a mosaic_method (e.g. for creating a mean mosaic of a "pre_flood" raster), Default: minimum values get chosen for most effectively removing cloud artifacts, for more options check out the help page
+# Optional: define a mosaic_method (e.g. for creating a mean-value mosaic of a "pre_flood" raster), Default: minimum values get chosen for most effectively removing cloud artifacts, for more options check out the help page
 mosaic_method <- "min"
 
 # Run the function for automatic AOI cropping, cloud-masking and mosaic creation (if necessary)
@@ -158,7 +164,7 @@ caption_text <- "Created by You"
 
 FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_size = sort_by_flood_size, caption_text = caption_text)
 
-# You should now have a map with the flood extent of Porto Alegre, Brazil 2024 in your working directory flood_map folder
+# You should now have a map of the 2024 flood extent in Porto Alegre, Brazil, saved in your working directory's flood_map folder
 # See the example below
 
 # Consider trying out other Areas of your Interest!
@@ -171,8 +177,8 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 ## Limitations
 
 - Tested for AOIs smaller than or equal to Sentinel-2 tiles (110 km x
-  110 km), larger AOIs may not work due to function design, Copernicus
-  Dataspace API or local computational limitations
+  110 km), larger AOIs may not work due to function design and
+  Copernicus Dataspace API integration
 
 - Copernicus Dataspace two-factor authentication is currently **NOT**
   supported
