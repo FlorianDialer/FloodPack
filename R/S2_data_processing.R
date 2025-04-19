@@ -56,6 +56,7 @@ S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
     stop("Unvalid mosaic_method chosen! Please refer to the help page for valid options.")
   }
 
+
   #Processing Tiles individually
   message("Applying Cloud Mask and Cropping to AOI...")
 
@@ -74,13 +75,15 @@ S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
 
     #Making sure that all raster files have the same CRS
     if (terra::crs(tile_bands_rast) != terra::crs(terra::rast(jp2s[[1]][1]))) {
-      tile_bands_rast <- terra::project(tile_bands_rast, terra::crs(terra::rast(jp2s[[1]][1])))
+      tile_bands_rast <- terra::project(tile_bands_rast, terra::crs(terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])])))
+      tile_bands_rast <- terra::resample(tile_bands_rast, terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])]))
     }
 
     tile_SCL_rast <- terra::rast(tile_scl)
 
     if (terra::crs(tile_SCL_rast) != terra::crs(terra::rast(jp2s[[1]][1]))) {
-      tile_SCL_rast <- terra::project(tile_SCL_rast, terra::crs(terra::rast(jp2s[[1]][1])))
+      tile_SCL_rast <- terra::project(tile_SCL_rast, terra::crs(terra::rast(jp2s[[1]][grepl("SCL", jp2s[[1]])])))
+      tile_SCL_rast <- terra::resample(tile_SCL_rast, terra::rast(jp2s[[1]][grepl("SCL", jp2s[[1]])]))
     }
 
     #Resampling Scene Classification Mask due to 20m resolution (bands 10m), nearest neighbour because of discontinuous data
