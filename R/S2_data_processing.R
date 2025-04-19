@@ -1,4 +1,4 @@
-#' Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking
+#' Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking; previous S2_data_download function runs are necessary for this function to work
 #'
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param condition Specifies the Images Depiction, either pre_flood or flood01, flood02... flood10... as a String with NO File Extension
@@ -137,6 +137,7 @@ S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
     dir.create(processed_data_directory)
   }
 
+  #Exporting raster file as TIFF
   message("Creating Final Raster...")
   terra::writeRaster(x = final_data_S2, filename = paste0(processed_data_directory, glue::glue("/{condition}.TIF")), overwrite = TRUE)
   message("Processing Complete!")

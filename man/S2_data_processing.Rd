@@ -2,7 +2,7 @@
 % Please edit documentation in R/S2_data_processing.R
 \name{S2_data_processing}
 \alias{S2_data_processing}
-\title{Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking}
+\title{Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking; previous S2_data_download function runs are necessary for this function to work}
 \usage{
 S2_data_processing(aoi, condition, mosaic_method = "min")
 }
@@ -17,7 +17,7 @@ S2_data_processing(aoi, condition, mosaic_method = "min")
 The processed Sentinel-2 bands cropped and masked to your AOI, including Cloud Masking and Mosaic Creation in the Working Directory in the folder "processed-data"
 }
 \description{
-Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking
+Processing of Sentinel-2 Bands with Cloud Masking and AOI Cropping/Masking; previous S2_data_download function runs are necessary for this function to work
 }
 \examples{
 

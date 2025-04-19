@@ -12,7 +12,7 @@ S2_data_download(
   aoi,
   condition,
   cloud_cover_percent = 50,
-  number_of_results = 6
+  number_of_results = 4
 )
 }
 \arguments{

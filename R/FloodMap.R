@@ -1,4 +1,4 @@
-#' Create a Map displaying calculated Flood Areas
+#' Create a Map displaying calculated Flood Areas; previous S2_data_download, S2_data_processing and SFMI_flood_calculation function runs are necessary for this function to work
 #'
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param title Define a Title for the Map as a String

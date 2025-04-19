@@ -2,7 +2,7 @@
 % Please edit documentation in R/FloodMap.R
 \name{FloodMap}
 \alias{FloodMap}
-\title{Create a Map displaying calculated Flood Areas}
+\title{Create a Map displaying calculated Flood Areas; previous S2_data_download, S2_data_processing and SFMI_flood_calculation function runs are necessary for this function to work}
 \usage{
 FloodMap(
   aoi,
@@ -39,7 +39,7 @@ FloodMap(
 A Map in the Working Directory in the folder "flood_map" in different Formats for Publication
 }
 \description{
-Create a Map displaying calculated Flood Areas
+Create a Map displaying calculated Flood Areas; previous S2_data_download, S2_data_processing and SFMI_flood_calculation function runs are necessary for this function to work
 }
 \examples{
 

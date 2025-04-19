@@ -43,7 +43,7 @@
 #' @importFrom tidyterra geom_spatraster_rgb
 #' @importFrom grDevices graphics.off
 
-S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 6) {
+S2_data_download <- function(username, password, start_date, end_date, aoi, condition, cloud_cover_percent = 50, number_of_results = 4) {
 
   #Retrieve Access Token from Copernicus Hub for later download
   access_token_retrival <- list(client_id = "cdse-public",
@@ -161,7 +161,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
 
   }
 
-  #Creating function for selecting tiles
+  #Creating function for selecting tiles; firstly loading data
   tile_footprint_list <- list.files(temp_directory, pattern = "\\.gpkg$", full.names = TRUE)
 
   tile_footprint_sf <- sapply(tile_footprint_list, sf::st_read, quiet = TRUE)
@@ -171,7 +171,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   preview_image_raster <- lapply(preview_image_list, terra::rast)
 
 
-
+  #Creating Preview Images
   for (i in seq_along(tile_footprint_sf)) {
 
     #Extract Elements for Plotting
@@ -200,8 +200,10 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   tile_answer <- readline(prompt = "Select S2 tile(s) for your AOI (e.g. 1 or 1,4,6):")
   tile_answer <- as.numeric(unlist(strsplit((tile_answer), split = ",")))
 
+  #To make sure that plots get disabled after function has run
   grDevices::graphics.off()
 
+  #Processing of getting correct granuleID from user selection
   selected_granules <- vector()
 
   if (length(tile_answer)==0 | !is.numeric(tile_answer)) {
@@ -236,7 +238,7 @@ S2_data_download <- function(username, password, start_date, end_date, aoi, cond
   #Get individual bands based on user choosing tiles
   for (granule_ID in selected_granules) {
 
-    message(paste0("Downloading selected tile ", which(selected_granules==granule_ID), " of ", length(selected_granules), "..." ))
+    message(paste0("Downloading selected tile ", which(selected_granules==granule_ID), " of ", length(selected_granules)))
 
 
     #Iteratively build strings for finding the correct link/path for downloading individual bands

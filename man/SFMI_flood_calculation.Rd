@@ -2,7 +2,7 @@
 % Please edit documentation in R/SFMI_flood_calculation.R
 \name{SFMI_flood_calculation}
 \alias{SFMI_flood_calculation}
-\title{Calculate Flood Areas based on Sentinel-2 Bands}
+\title{Calculate Flood Areas based on Sentinel-2 Bands; previous S2_data_download and S2_data_processing function runs are necessary for this function to work}
 \usage{
 SFMI_flood_calculation(
   aoi,
@@ -18,7 +18,7 @@ SFMI_flood_calculation(
 Returns Flood Areas inside the AOI in Raster and Vector format named ascending in the Working Directory in the folder "flood_data" ; also returns an Elevation Folder in the Working Directory necessary for processing which can be ignored/deleted
 }
 \description{
-Calculate Flood Areas based on Sentinel-2 Bands
+Calculate Flood Areas based on Sentinel-2 Bands; previous S2_data_download and S2_data_processing function runs are necessary for this function to work
 }
 \examples{
 

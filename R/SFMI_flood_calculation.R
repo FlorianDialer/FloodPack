@@ -1,4 +1,4 @@
-#' Calculate Flood Areas based on Sentinel-2 Bands
+#' Calculate Flood Areas based on Sentinel-2 Bands; previous S2_data_download and S2_data_processing function runs are necessary for this function to work
 #'
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
 #' @param path_to_rasters Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String
