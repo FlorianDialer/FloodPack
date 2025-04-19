@@ -186,6 +186,10 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 - Package works only in UTF8 environment; certain Latin characters may
   cause errors (especially on Windows Operating Systems)
 
+- If Sentinel-2 tiles have a different CRS their is currently an issue
+  with scene-mosaicking which might prevent AOI to be fully covered. If
+  this is the case for you please try different tiles.
+
 ## References
 
 - European Space Agency. (2022). Sentinel-2 MSI Level-2A BOA Reflectance
