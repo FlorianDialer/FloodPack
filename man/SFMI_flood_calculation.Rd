@@ -12,7 +12,7 @@ SFMI_flood_calculation(
 \arguments{
 \item{aoi}{Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand}
 
-\item{path_to_rasters}{Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String}
+\item{path_to_rasters}{Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String. Your raster files in TIF format need to have 4 layers named including band names B02, B03, B04, B08 as well as date information in format YYYY-MM-DD, ideally added by terra::time to each layer, files need to be named pre_flood, flood_01, flood_xx...}
 }
 \value{
 Returns Flood Areas inside the AOI in Raster and Vector format named ascending in the Working Directory in the folder "flood_data" ; also returns an Elevation Folder in the Working Directory necessary for processing which can be ignored/deleted
