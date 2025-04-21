@@ -1,7 +1,7 @@
 #' Calculate Flood Areas based on Sentinel-2 Bands; previous S2_data_download and S2_data_processing function runs are necessary for this function to work
 #'
 #' @param aoi Area of Interest as the Path to a Vector File .shp or .gpkg; Warning: Always the first Feature gets selected --> If you have multiple Geometries unionize them beforehand
-#' @param path_to_rasters Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String
+#' @param path_to_rasters Optional: If you changed the processed Files Location or want to use your own Data specify the Directory as a String. Your raster files in TIF format need to have 4 layers named including band names B02, B03, B04, B08 as well as date information in format YYYY-MM-DD, ideally added by terra::time to each layer, files need to be named pre_flood, flood_01, flood_xx...
 #'
 #' @returns Returns Flood Areas inside the AOI in Raster and Vector format named ascending in the Working Directory in the folder "flood_data" ; also returns an Elevation Folder in the Working Directory necessary for processing which can be ignored/deleted
 #' @export
@@ -21,6 +21,8 @@
 
 SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "processed_data")) {
 
+  aoi <- sf::st_read(aoi, quiet = TRUE)
+
   #Get final raster files for processing
   files_in_final_data <- list.files(path_to_rasters, full.names = TRUE)
 
@@ -33,11 +35,27 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
 
   flood_rasters_path <- files_in_final_data[!grepl("pre", files_in_final_data)]
 
+  #Check if CRS are the same
+  for (i in seq_along(flood_rasters_path)) {
+    if (terra::crs(terra::rast(pre_flood_raster_path[1])) != terra::crs(terra::rast(flood_rasters_path[i]))) {
+      message("Reprojecting files due to different CRS...")
+      aoi_tilecrs <- sf::st_transform(aoi, terra::crs(terra::rast(pre_flood_raster_path[1])))
+      raster_projected <- terra::project(terra::rast(flood_rasters_path[i]), terra::rast(pre_flood_raster_path[1]))
+      raster_cropped <- terra::crop(raster_projected, aoi_tilecrs)
+      raster_resampled <- terra::resample(raster_cropped, terra::rast(pre_flood_raster_path[1]))
+      raster_masked <- terra::mask(raster_resampled, aoi_tilecrs)
+      #Writing raster to same location so that now CRS will match for all files
+      terra::writeRaster(raster_masked, filename = flood_rasters_path[i], overwrite = TRUE)
+  }}
+
+  #Reread files to make sure that any changes are loaded correctly
+  files_in_final_data <- list.files(path_to_rasters, full.names = TRUE)
+  flood_rasters_path <- files_in_final_data[!grepl("pre", files_in_final_data)]
+
 
   #Download Elevation Data
 
   #Prepare Query - extract Latitude and Longitude values for elevation download
-  aoi <- sf::st_read(aoi, quiet = TRUE)
   aoi <- sf::st_transform(aoi, "EPSG:4326")
   bbox <- sf::st_bbox(aoi[1,])
   lon_min <- floor(bbox[1])
@@ -98,9 +116,10 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
   full_elevation_data_new_crs <- terra::project(full_elevation_data, tile_crs)
 
   #Cropping and Masking to AOI as well as resampling to 10m from 30m for same extent
-  cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, pre_flood_raster)
+  aoi_tilecrs <- sf::st_transform(aoi, tile_crs)
+  cropped_elevation_data <- terra::crop(full_elevation_data_new_crs, aoi_tilecrs)
   resampled_elevation_data <- terra::resample(cropped_elevation_data, pre_flood_raster)
-  final_elevation_data <- terra::mask(resampled_elevation_data, pre_flood_raster)
+  final_elevation_data <- terra::mask(resampled_elevation_data, aoi_tilecrs)
 
 
   #Convert Elevation Data to Slope in Percent for Mask
@@ -113,6 +132,7 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
   percent_slope_gt_15 <- percent_slope>15
 
 
+
   #NDVI Calculations for all raster files
   message("Calculating NDVI...")
 
@@ -120,7 +140,8 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
 
   for (i in seq_along(flood_rasters_path)) {
     flood_raster <- terra::rast(flood_rasters_path[i])
-    flood_NDVI <- NDVI(raster = flood_raster)
+    flood_raster_resample <- terra::resample(flood_raster, pre_flood_raster)
+    flood_NDVI <- NDVI(raster = flood_raster_resample)
     flood_NDVI_gt_04 <- flood_NDVI>0.4
 
     flood_raster_NDVI_list[[i]] <- flood_NDVI_gt_04
@@ -141,10 +162,11 @@ SFMI_flood_calculation <- function(aoi, path_to_rasters = file.path(getwd(), "pr
 
   for (i in seq_along(flood_rasters_path)) {
     flood_raster <- terra::rast(flood_rasters_path[i])
-    flood_SFMI <- SFMI(raster = flood_raster)
+    flood_raster_resample <- terra::resample(flood_raster, pre_flood_raster)
+    flood_SFMI <- SFMI(raster = flood_raster_resample)
 
-    #Values greater 0 are water areas based on SFMI paper
-    flood_SFMI_gt_0 <- flood_SFMI>0
+    #Values greater 0 are water areas based on SFMI paper, changing this slightly to allow to cut out any wrong data due to resampling
+    flood_SFMI_gt_0 <- flood_SFMI>0.0001
 
     flood_raster_SFMI_list[[i]] <- flood_SFMI_gt_0
   }
