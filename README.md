@@ -186,9 +186,9 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
 - Package works only in UTF8 environment; certain Latin characters may
   cause errors (especially on Windows Operating Systems)
 
-- If Sentinel-2 tiles have a different CRS their is currently an issue
-  with scene-mosaicking which might prevent AOI to be fully covered. If
-  this is the case for you please try different tiles.
+- If Sentinel-2 tiles have a different CRS there is currently an issue
+  with scene-mosaicking which might break functionality. If this is the
+  case for you please try different tiles with same CRS.
 
 ## References
 
@@ -203,6 +203,59 @@ FloodMap(aoi = aoi, title = title, map_file_name = map_file_name, sort_by_flood_
   new index for flood mapping using Sentinel-2 imagery (SFMI). Computers
   & Geosciences, 194, 105742.
   <https://doi.org/10.1016/j.cageo.2024.105742>
+
+## R packages references
+
+- Schwalb-Willmann J (2024). *basemaps: Accessing Spatial Basemaps in
+  R*. R package version 0.0.8,
+  <https://CRAN.R-project.org/package=basemaps>.
+
+- Wickham H, François R, Henry L, Müller K, Vaughan D (2023). *dplyr: A
+  Grammar of Data Manipulation*. R package version 1.1.4,
+  <https://CRAN.R-project.org/package=dplyr>.
+
+- Hijmans RJ, Barbosa M, Ghosh A, Mandel A (2024). *geodata: Download
+  Geographic Data*. R package version 0.6-2,
+  <https://CRAN.R-project.org/package=geodata>.
+
+- Wickham H (2016). *ggplot2: Elegant Graphics for Data Analysis*.
+  Springer-Verlag New York, <https://ggplot2.tidyverse.org>.
+
+- Dunnington D (2023). *ggspatial: Spatial Data Framework for ggplot2*.
+  R package version 1.1.9,
+  <https://CRAN.R-project.org/package=ggspatial>.
+
+- Hester J, Bryan J (2024). *glue: Interpreted String Literals*. R
+  package version 1.8.0, <https://CRAN.R-project.org/package=glue>.
+
+- Wickham H (2023). *httr: Tools for Working with URLs and HTTP*. R
+  package version 1.4.7, <https://CRAN.R-project.org/package=httr>.
+
+- Pebesma E, Bivand R (2023). *Spatial Data Science: With Applications
+  in R*. Chapman and Hall/CRC. <https://doi.org/10.1201/9780429459016>.
+
+- Pebesma E (2018). *Simple Features for R: Standardized Support for
+  Spatial Vector Data*. The R Journal 10(1), 439–446.
+  <https://doi.org/10.32614/RJ-2018-009>.
+
+- Wickham H (2023). *stringr: Simple, Consistent Wrappers for Common
+  String Operations*. R package version 1.5.1,
+  <https://CRAN.R-project.org/package=stringr>.
+
+- Hijmans R (2025). *terra: Spatial Data Analysis*. R package version
+  1.8-42, <https://CRAN.R-project.org/package=terra>.
+
+- Hernangómez D (2023). *Using the tidyverse with terra objects: the
+  tidyterra package*. Journal of Open Source Software, 8(91), 5751.
+  <https://doi.org/10.21105/joss.05751>.
+
+- R Core Team (2025). *R: A Language and Environment for Statistical
+  Computing*. R Foundation for Statistical Computing, Vienna, Austria.
+  <https://www.R-project.org/>.
+
+- Temple Lang D (2025). *XML: Tools for Parsing and Generating XML
+  Within R and S-Plus*. R package version 3.99-0.18,
+  <https://CRAN.R-project.org/package=XML>.
 
 ## License
 
