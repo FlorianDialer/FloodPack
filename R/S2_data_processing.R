@@ -57,6 +57,22 @@ S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
   }
 
 
+  #Get combined extent of all tiles to make resampling possible if CRS needs to be changed
+  tile_extent <- list()
+  for (i in seq_along(jp2s)) {
+    tile <- terra::rast(jp2s[[i]][grepl("B02", jp2s[[i]])])
+    tile_extent[[i]] <- terra::ext(tile)
+  }
+
+  #Get full extent by unionizing all extents
+  full_extent <- tile_extent[[1]]
+  if (length(tile_extent)>1) {
+    for (i in 2:length(tile_extent)) {
+      full_extent <- terra::union(full_extent, tile_extent[[i]])
+    }
+  }
+
+
   #Processing Tiles individually
   message("Applying Cloud Mask and Cropping to AOI...")
 
@@ -73,17 +89,26 @@ S2_data_processing <- function(aoi, condition, mosaic_method = "min") {
 
     tile_bands_rast <- terra::rast(tile_bands)
 
+
     #Making sure that all raster files have the same CRS
     if (terra::crs(tile_bands_rast) != terra::crs(terra::rast(jp2s[[1]][1]))) {
+      message("Reprojecting due to different CRS, may take a while...")
+
+      #Create an empty raster for resampling to work (10m for the bands)
+      resample_raster_bands <- terra::rast(full_extent, resolution = 10, crs = terra::crs(terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])])))
+
       tile_bands_rast <- terra::project(tile_bands_rast, terra::crs(terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])])))
-      tile_bands_rast <- terra::resample(tile_bands_rast, terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])]))
+      tile_bands_rast <- terra::resample(tile_bands_rast, resample_raster_bands)
     }
 
     tile_SCL_rast <- terra::rast(tile_scl)
 
     if (terra::crs(tile_SCL_rast) != terra::crs(terra::rast(jp2s[[1]][1]))) {
-      tile_SCL_rast <- terra::project(tile_SCL_rast, terra::crs(terra::rast(jp2s[[1]][grepl("SCL", jp2s[[1]])])))
-      tile_SCL_rast <- terra::resample(tile_SCL_rast, terra::rast(jp2s[[1]][grepl("SCL", jp2s[[1]])]))
+      #Create an empty raster for resampling to work (20m for SCL)
+      resample_raster_SCL <- terra::rast(full_extent, resolution = 20, crs = terra::crs(terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])])))
+
+      tile_SCL_rast <- terra::project(tile_SCL_rast, terra::crs(terra::rast(jp2s[[1]][grepl("B02", jp2s[[1]])])))
+      tile_SCL_rast <- terra::resample(tile_SCL_rast, resample_raster_SCL, method = "near")
     }
 
     #Resampling Scene Classification Mask due to 20m resolution (bands 10m), nearest neighbour because of discontinuous data
